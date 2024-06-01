@@ -4,6 +4,7 @@ description = "cargo-near-new-project-description"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/intelnear/oracle"
+license = "MIT OR Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
