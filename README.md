@@ -62,9 +62,9 @@ To withdraw your fees as a producer or a consumer, use `withdraw_near()` or `wit
 Check out our nearblocks page with all other methods. Tl;dr: You can check deposit balances, stats of successful / timed out requests per producer, and
 storage management methods.
 
-## Running
+## Build & Test
 
-Currently, it's quite hard to run or test, because yielded execution is only included in a release candidate, and some dependencies haven't been updated
+Currently, it's quite hard to test, because yielded execution is only included in a release candidate, and some dependencies haven't been updated
 for months, or may be incompatible with the git near-sdk (such as near-sdk-contract-tools). That's also the reason the contract has not fully implemented
 all standards and best security practices yet. To test it, you also need to compile (or download, if it's already available by the time you read this)
 `neard` in sandbox mode, and set `NEAR_SANDBOX_BIN_PATH` environment variable.
