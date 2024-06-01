@@ -66,11 +66,5 @@ async fn test_contract_is_operational() -> Result<(), Box<dyn std::error::Error>
     };
     tokio::join!(request, response);
 
-    // let user_message_outcome = contract
-    //     .view("get_greeting")
-    //     .args_json(json!({}))
-    //     .await?;
-    // assert_eq!(user_message_outcome.json::<String>()?, "Hello World!");
-
     Ok(())
 }
