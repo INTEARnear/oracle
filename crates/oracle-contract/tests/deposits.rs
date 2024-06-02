@@ -136,7 +136,7 @@ async fn near_deposits() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[tokio::test]
-pub async fn near_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
+async fn near_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = near_workspaces::compile_project("./").await?;
 
@@ -230,3 +230,5 @@ pub async fn near_deposit_for_producer() -> Result<(), Box<dyn std::error::Error
 
     Ok(())
 }
+
+// TODO ft deposits
