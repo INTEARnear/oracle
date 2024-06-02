@@ -100,6 +100,8 @@ impl Contract {
             ) {
                 env::panic_str("Resumption token not found")
             }
+        } else {
+            env::panic_str("Request not found or already responded to")
         }
     }
 }
