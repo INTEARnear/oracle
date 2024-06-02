@@ -55,7 +55,8 @@ it's easier to just charge $1 upfront for each query and refund $0.9995 in the `
 
 ### Withdrawing balance
 
-To withdraw your fees as a producer or a consumer, use `withdraw_near()` or `withdraw_ft(token_id: AccountId)` methods.
+To withdraw your fees as a consumer, use `withdraw_near()` or `withdraw_ft(token_id: AccountId)` methods. Producers get their fees automatically once
+they fulfill a request.
 
 ### View methods and third-party standard method
 
