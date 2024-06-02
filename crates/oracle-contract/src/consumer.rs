@@ -80,6 +80,10 @@ impl Contract {
         self.consumers.insert(account_id, consumer);
     }
 
+    pub fn is_registered_as_consumer(&self, account_id: &ConsumerId) -> bool {
+        self.consumers.contains_key(account_id)
+    }
+
     pub fn request(&mut self, producer_id: ProducerId, request_data: String) {
         let consumer_id = env::predecessor_account_id();
         let _consumer = self

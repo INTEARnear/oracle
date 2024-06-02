@@ -50,13 +50,16 @@ impl Contract {
             account_id: account_id.clone(),
             requests_succeded: 0,
             requests_timed_out: 0,
-            #[cfg(not(feature = "near-sdk/__abi-generate"))]
             requests_pending: IterableMap::new(StorageKey::PendingRequests {
                 producer: account_id.clone(),
             }),
             fee: None,
         };
         self.producers.insert(account_id, producer);
+    }
+
+    pub fn is_producer(&self, account_id: ProducerId) -> bool {
+        self.producers.contains_key(&account_id)
     }
 
     #[private]
