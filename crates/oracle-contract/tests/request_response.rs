@@ -1,7 +1,7 @@
 use serde_json::json;
 
 #[tokio::test]
-async fn test_contract_is_operational() -> Result<(), Box<dyn std::error::Error>> {
+async fn contract_is_operational() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = near_workspaces::compile_project("./").await?;
 

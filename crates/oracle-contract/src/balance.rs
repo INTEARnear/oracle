@@ -25,12 +25,14 @@ impl Contract {
             if let Some(near_balance) = consumer.near_balance_producer.get_mut(&producer_id) {
                 *near_balance = near_balance.checked_add(amount).expect("Overflow");
             } else {
-                consumer.near_balance_producer.insert(producer_id, amount);
+                consumer
+                    .near_balance_producer
+                    .insert(producer_id.clone(), amount);
             }
-            log!("Deposited {amount} NEAR to {account_id} for {producer_id}");
+            log!("Deposited {amount} to {account_id} for {producer_id}",);
         } else {
             consumer.near_balance = consumer.near_balance.checked_add(amount).expect("Overflow");
-            log!("Deposited {amount} NEAR to {account_id}");
+            log!("Deposited {amount} to {account_id}",);
         }
     }
 
@@ -96,12 +98,14 @@ impl Contract {
             if near_balance.is_zero() {
                 consumer.near_balance_producer.remove(&producer_id);
             }
+            log!("Withdrew {amount} from {account_id} for {producer_id}",);
         } else {
             near_sdk::require!(consumer.near_balance >= amount, "Not enough balance");
             consumer.near_balance = consumer
                 .near_balance
                 .checked_sub(amount)
                 .expect("Underflow");
+            log!("Withdrew {amount} from {account_id}",);
         }
         Promise::new(account_id).transfer(amount);
     }
@@ -131,8 +135,12 @@ impl Contract {
             if *ft_balance == 0.into() {
                 consumer
                     .ft_balances_producer
-                    .remove(&(producer_id, ft_id.clone()));
+                    .remove(&(producer_id.clone(), ft_id.clone()));
             }
+            log!(
+                "Withdrew {amount} {ft_id} from {account_id} for {producer_id}",
+                amount = amount.0
+            );
         } else {
             let ft_balance = consumer.ft_balances.get_mut(&ft_id).expect("No balance");
             near_sdk::require!(*ft_balance >= amount, "Not enough balance");
@@ -144,6 +152,10 @@ impl Contract {
             if *ft_balance == 0.into() {
                 consumer.ft_balances.remove(&ft_id);
             }
+            log!(
+                "Withdrew {amount} {ft_id} from {account_id}",
+                amount = amount.0
+            );
         }
         // TODO replace with high-level call when not using git near-sdk
         Promise::new(ft_id).function_call(
@@ -204,16 +216,22 @@ impl Contract {
             } else {
                 consumer
                     .ft_balances_producer
-                    .insert((producer_id, ft_id), amount);
+                    .insert((producer_id.clone(), ft_id.clone()), amount);
             }
-            log!("Deposited {amount} {account_id} to {sender_id} for {producer_id}");
+            log!(
+                "Deposited {amount} {ft_id} to {account_id} for {producer_id}",
+                amount = amount.0
+            );
         } else {
             if let Some(ft_balance) = consumer.ft_balances.get_mut(&ft_id) {
                 *ft_balance = ft_balance.0.checked_add(amount.0).expect("Overflow").into();
             } else {
-                consumer.ft_balances.insert(ft_id, amount);
+                consumer.ft_balances.insert(ft_id.clone(), amount);
             }
-            log!("Deposited {amount} {account_id} to {sender_id}");
+            log!(
+                "Deposited {amount} {ft_id} to {account_id}",
+                amount = amount.0
+            );
         }
         PromiseOrValue::Value(U128(0))
     }
