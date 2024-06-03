@@ -86,53 +86,59 @@ impl Contract {
 
     pub fn request(&mut self, producer_id: ProducerId, request_data: String) {
         let consumer_id = env::predecessor_account_id();
-        let _consumer = self
-            .consumers
-            .get_mut(&consumer_id)
-            .expect("Consumer is not registered");
-        let producer = self
+        let fee = self
             .producers
-            .get_mut(&producer_id)
-            .expect("Producer doesn't exist");
-        // TODO: Charge fee
-        let request_id = self.next_request_id;
-        self.next_request_id = self
-            .next_request_id
-            .0
-            .checked_add(1)
-            .expect("Overflow")
-            .into();
+            .get(&producer_id)
+            .expect("Producer doesn't exist")
+            .fee
+            .clone();
+        if let Some(charged_fee) = self.try_charge_fee(&consumer_id, &producer_id, &fee) {
+            let request_id = self.next_request_id;
+            self.next_request_id = self
+                .next_request_id
+                .0
+                .checked_add(1)
+                .expect("Overflow")
+                .into();
 
-        let promise_idx = env::promise_yield_create(
-            "on_response",
-            &serde_json::to_vec(&serde_json::json!({
-                "producer_id": producer_id,
-                "request_id": request_id,
-            }))
-            .unwrap(),
-            Gas::from_tgas(5),
-            GasWeight::default(),
-            RESUMPTION_TOKEN_REGISTER,
-        );
-        let resumption_token = if let Some(data) = env::read_register(RESUMPTION_TOKEN_REGISTER) {
-            if let Ok(resumption_token) = ResumptionToken::try_from(data) {
-                resumption_token
+            let promise_idx = env::promise_yield_create(
+                "on_response",
+                &serde_json::to_vec(&serde_json::json!({
+                    "producer_id": producer_id,
+                    "request_id": request_id,
+                    "consumer_id": consumer_id,
+                    "fee": charged_fee,
+                }))
+                .unwrap(),
+                Gas::from_tgas(5),
+                GasWeight::default(),
+                RESUMPTION_TOKEN_REGISTER,
+            );
+            let resumption_token = if let Some(data) = env::read_register(RESUMPTION_TOKEN_REGISTER)
+            {
+                if let Ok(resumption_token) = ResumptionToken::try_from(data) {
+                    resumption_token
+                } else {
+                    env::panic_str("Wrong register length")
+                }
             } else {
-                env::panic_str("Wrong register length")
-            }
-        } else {
-            env::panic_str("Register is empty")
-        };
+                env::panic_str("Register is empty")
+            };
 
-        producer
-            .requests_pending
-            .insert(request_id, PendingRequest { resumption_token });
-        OracleEvent::Request(RequestEventV1 {
-            consumer_id,
-            request_id,
-            request_data,
-        })
-        .emit();
-        env::promise_return(promise_idx);
+            self.producers
+                .get_mut(&producer_id)
+                .expect("Producer doesn't exist")
+                .requests_pending
+                .insert(request_id, PendingRequest { resumption_token });
+            OracleEvent::Request(RequestEventV1 {
+                consumer_id,
+                request_id,
+                request_data,
+            })
+            .emit();
+            env::promise_return(promise_idx);
+        } else {
+            env::panic_str("Not enough balance");
+        }
     }
 }

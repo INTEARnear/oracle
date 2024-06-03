@@ -2136,7 +2136,7 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "5.1.0"
-source = "git+https://github.com/near/near-sdk-rs#5a9acaedc95c5721d2088f263bc99e3de574decf"
+source = "git+https://github.com/near/near-sdk-rs#8a908c30ce43fbf1b1866486668a647fbc28b5bd"
 dependencies = [
  "base64 0.21.7",
  "borsh 1.5.1",
@@ -2198,7 +2198,7 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "5.1.0"
-source = "git+https://github.com/near/near-sdk-rs#5a9acaedc95c5721d2088f263bc99e3de574decf"
+source = "git+https://github.com/near/near-sdk-rs#8a908c30ce43fbf1b1866486668a647fbc28b5bd"
 dependencies = [
  "Inflector",
  "darling",
@@ -2226,7 +2226,7 @@ checksum = "397688591acf8d3ebf2c2485ba32d4b24fc10aad5334e3ad8ec0b7179bfdf06b"
 [[package]]
 name = "near-sys"
 version = "0.2.1"
-source = "git+https://github.com/near/near-sdk-rs#5a9acaedc95c5721d2088f263bc99e3de574decf"
+source = "git+https://github.com/near/near-sdk-rs#8a908c30ce43fbf1b1866486668a647fbc28b5bd"
 
 [[package]]
 name = "near-token"

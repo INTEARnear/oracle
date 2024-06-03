@@ -1,6 +1,7 @@
-mod balance;
-mod consumer;
-mod producer;
+pub mod balance;
+pub mod consumer;
+pub mod fees;
+pub mod producer;
 
 use consumer::{Consumer, ConsumerId, RequestId};
 use near_sdk::{near, store::LookupMap, BorshStorageKey};

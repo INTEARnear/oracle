@@ -1,8 +1,8 @@
-use near_sdk::{env, log, near, serde_json, store::IterableMap, AccountId, NearToken};
+use near_sdk::{env, json_types::U128, log, near, serde_json, store::IterableMap, AccountId};
 
 use crate::{
-    balance::FtId,
-    consumer::{PendingRequest, RequestId},
+    consumer::{ConsumerId, PendingRequest, RequestId},
+    fees::{PrepaidFee, ProducerFee},
     Contract, ContractExt, StorageKey,
 };
 
@@ -11,6 +11,7 @@ pub type ProducerId = AccountId;
 #[near(serializers=[json])]
 pub struct Response {
     pub response_data: String,
+    pub refund_amount: Option<U128>,
 }
 
 /// A producer is an account that provides data to consumers.
@@ -26,21 +27,7 @@ pub struct Producer {
     /// Requests that are currently being processed.
     pub requests_pending: IterableMap<RequestId, PendingRequest>,
     /// Producers meant for public use may want to charge a fee.
-    pub fee: Option<ProducerFee>,
-}
-
-/// Fees are set by producers. If the consumer's balance is less
-/// than min_fee, the request will be rejected without a log generated.
-/// The producer may choose to refund a part of the fee if the request
-/// was successful. If the indexer times out, the fee is refunded fully.
-#[near(serializers=[borsh, json])]
-pub struct ProducerFee {
-    /// Fee fungible token. If None, it's NEAR.
-    pub ft_token: Option<FtId>,
-    /// Fee amount in the fungible token.
-    pub ft_min_fee: Option<NearToken>,
-    /// Fee amount in NEAR. If None, it's 0.
-    pub near_min_fee: Option<NearToken>,
+    pub fee: ProducerFee,
 }
 
 #[near]
@@ -53,7 +40,7 @@ impl Contract {
             requests_pending: IterableMap::new(StorageKey::PendingRequests {
                 producer: account_id.clone(),
             }),
-            fee: None,
+            fee: ProducerFee::None,
         };
         self.producers.insert(account_id, producer);
     }
@@ -67,6 +54,8 @@ impl Contract {
         &mut self,
         producer_id: ProducerId,
         request_id: RequestId,
+        consumer_id: ConsumerId,
+        fee: PrepaidFee,
         #[callback_unwrap] response: Option<Response>,
     ) -> Option<Response> {
         let producer = self
@@ -78,11 +67,15 @@ impl Contract {
             request_id = request_id.0,
             response = response.as_ref().map(|r| &r.response_data)
         );
-        // TODO: Fee refunds
-        if let Some(_response) = response.as_ref() {
+        if let Some(response) = response.as_ref() {
             producer.requests_succeded += 1;
+            if let Some(refund_amount) = response.refund_amount {
+                self.refund_partially(&consumer_id, &producer_id, &fee, refund_amount);
+            }
+            self.deposit_to_producer(producer_id, &fee, response.refund_amount);
         } else {
             producer.requests_timed_out += 1;
+            self.refund_fully(&consumer_id, &producer_id, &fee);
         }
         response
     }
