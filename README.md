@@ -3,7 +3,7 @@
 INTEAR Oracle is a project that aims to bring off-chain computation and data availability into NEAR, with the best developer experience.
 
 It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519), which as of now, is only added as a release candidate (cutting edge tech!)
-and [inindexer](https://github.com/INTEARnear/inindexer) for submitting the data on-chain.
+and [inindexer](https://github.com/INTEARnear/inindexer) for receiving requests.
 
 ## Contract
 
