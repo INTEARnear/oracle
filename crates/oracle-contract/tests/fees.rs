@@ -123,6 +123,7 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
     let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
+    let producer_initial_balance = producer_account.view_account().await?.balance;
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
@@ -255,6 +256,14 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
         NearToken::from_millinear(1000 - 100)
     );
 
+    let producer_new_balance = producer_account.view_account().await?.balance;
+    assert!(
+        producer_new_balance
+            .checked_sub(producer_initial_balance)
+            .unwrap()
+            < NearToken::from_millinear(100)
+    );
+
     Ok(())
 }
 
@@ -266,6 +275,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
+    let producer_initial_balance = producer_account.view_account().await?.balance;
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
@@ -396,6 +406,14 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(
         outcome.json::<NearToken>().unwrap(),
         NearToken::from_millinear(1000 - 100 + 50)
+    );
+
+    let producer_new_balance = producer_account.view_account().await?.balance;
+    assert!(
+        producer_new_balance
+            .checked_sub(producer_initial_balance)
+            .unwrap()
+            < NearToken::from_millinear(100 - 50)
     );
 
     Ok(())
