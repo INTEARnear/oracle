@@ -54,6 +54,7 @@ pub enum OracleEvent {
 
 #[near(serializers=["json"])]
 pub struct RequestEventV1 {
+    pub producer_id: ProducerId,
     pub consumer_id: ConsumerId,
     pub request_id: RequestId,
     pub request_data: String,
@@ -131,6 +132,7 @@ impl Contract {
                 .requests_pending
                 .insert(request_id, PendingRequest { resumption_token });
             OracleEvent::Request(RequestEventV1 {
+                producer_id,
                 consumer_id,
                 request_id,
                 request_data,

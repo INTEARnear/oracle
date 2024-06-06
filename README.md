@@ -5,6 +5,10 @@ INTEAR Oracle is a project that aims to bring off-chain computation and data ava
 It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519), which as of now, is only added as a release candidate (cutting edge tech!)
 and [inindexer](https://github.com/INTEARnear/inindexer) for receiving requests.
 
+> Try it out!
+
+`near contract call-function as-transaction yielded-oracle.testnet request json-args '{"producer_id":"gpt4o.yielded-oracle.testnet","request_data":"Hello, GPT-4o!"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as $ACCOUNT_ID network-config testnet sign-with-keychain send`
+
 ## Contract
 
 ### Setting up

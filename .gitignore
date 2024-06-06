@@ -1,1 +1,3 @@
 target
+.env
+last-processed-block.txt
