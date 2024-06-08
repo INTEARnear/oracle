@@ -85,7 +85,7 @@ impl Indexer for GptIndexer {
                                         "messages": [
                                             {
                                                 "role": "system",
-                                                "content": "You are a helpful assistant developed by Intear that uses OpenAI GPT model."
+                                                "content": "You are a helpful assistant developed by Intear that uses OpenAI GPT model. Your responses are clear and concise, up to 2-3 sentences."
                                             },
                                             {
                                                 "role": "user",
@@ -106,6 +106,7 @@ impl Indexer for GptIndexer {
                                     .as_str()
                                     .unwrap()
                                     .to_owned();
+                                log::info!("Response: {response}");
                                 Ok(account
                                     .function_call(
                                         &ORACLE_CONTRACT.parse().unwrap(),
