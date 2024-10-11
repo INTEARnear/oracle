@@ -1,4 +1,4 @@
-use near_sdk::{env, json_types::U128, log, near, serde_json, store::IterableMap, AccountId};
+use near_sdk::{env, ext_contract, json_types::U128, log, near, serde_json, store::IterableMap, AccountId, PromiseError};
 
 use crate::{
     consumer::{ConsumerId, PendingRequest, RequestId},
@@ -28,6 +28,19 @@ pub struct Producer {
     pub requests_pending: IterableMap<RequestId, PendingRequest>,
     /// Producers meant for public use may want to charge a fee.
     pub fee: ProducerFee,
+    /// If true, the contract will receive `on_request(request_id,
+    /// request_data, prepaid_fee)` call
+    pub send_callback: bool,
+}
+
+#[ext_contract(ext_producer)]
+pub trait ProducerContract {
+    fn on_request(
+        &mut self,
+        request_id: RequestId,
+        request_data: String,
+        prepaid_fee: PrepaidFee,
+    );
 }
 
 #[near]
@@ -41,12 +54,21 @@ impl Contract {
                 producer: account_id.clone(),
             }),
             fee: ProducerFee::None,
+            send_callback: false,
         };
         self.producers.insert(account_id, producer);
     }
 
     pub fn is_producer(&self, account_id: ProducerId) -> bool {
         self.producers.contains_key(&account_id)
+    }
+
+    pub fn set_send_callback(&mut self, send_callback: bool) {
+        let producer = self
+            .producers
+            .get_mut(&env::predecessor_account_id())
+            .expect("Producer doesn't exist");
+        producer.send_callback = send_callback;
     }
 
     #[private]
@@ -56,7 +78,7 @@ impl Contract {
         request_id: RequestId,
         consumer_id: ConsumerId,
         fee: PrepaidFee,
-        #[callback_unwrap] response: Option<Response>,
+        #[callback_result] response: Result<Response, PromiseError>,
     ) -> Option<Response> {
         let producer = self
             .producers
@@ -67,7 +89,7 @@ impl Contract {
             request_id = request_id.0,
             response = response.as_ref().map(|r| &r.response_data)
         );
-        if let Some(response) = response.as_ref() {
+        if let Ok(response) = response.as_ref() {
             producer.requests_succeded += 1;
             if let Some(refund_amount) = response.refund_amount {
                 self.refund_partially(&consumer_id, &producer_id, &fee, refund_amount);
@@ -77,7 +99,7 @@ impl Contract {
             producer.requests_timed_out += 1;
             self.refund_fully(&consumer_id, &producer_id, &fee);
         }
-        response
+        response.ok()
     }
 
     pub fn respond(&mut self, request_id: RequestId, response: Response) {

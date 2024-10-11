@@ -36,7 +36,7 @@ There are just 2 interesting methods: `request` and `respond`, which are meant f
 
 Some data producers may choose to charge a fee for requesting some data using this method:
 
-`set_producer_fee(fee: ProducerFee)`, ProducerFee is defined in [crates/oracle-contract/src/producer.rs](crates/oracle-contract/src/producer.rs).
+`set_fee(fee: ProducerFee)`, ProducerFee is defined in [crates/oracle-contract/src/producer.rs](crates/oracle-contract/src/producer.rs).
 
 The oracle contract uses prepaid balance to optimize the amount of receipts generated, reducing the latency, but may allow per-request pricing in
 the future, if someone wants this feature added. To top up your balance, use these methods:
@@ -49,6 +49,12 @@ Parameters:
   if you specify it
 - `producer_id`: Top up balance for a specific producer. You can choose to not specify that parameter, and your *general balance* will be increased,
   which allows you to use the same balance for all producers. Depending on how you want to use it, you may want to go with separate balances.
+
+### Callbacks
+
+If your contract can submit data without off-chain intervention, or needs to store requests - you can call `set_send_callback(send_callback: bool)`,
+and if this value is set to `true`, the oracle contract will call `on_request(request_id: String, request_data: String, charged_fee: PrepaidFee)` on
+the producer contract every time it receives a request.
 
 ### Minimum fee
 

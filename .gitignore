@@ -1,3 +1,4 @@
 target
 .env
+node_modules
 last-processed-block.txt

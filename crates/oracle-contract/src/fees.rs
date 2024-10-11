@@ -17,6 +17,7 @@ pub enum ProducerFee {
 /// A fee that the consumer has paid for a request. Can be partially
 /// refunded by the producer in response.
 #[near(serializers=[json])]
+#[derive(Clone)]
 pub enum PrepaidFee {
     None,
     Near {
@@ -44,8 +45,9 @@ impl Contract {
             .expect("Producer is not registered")
             .fee = fee;
     }
+}
 
-    #[private]
+impl Contract {
     pub fn try_charge_fee(
         &mut self,
         consumer_id: &ConsumerId,
@@ -91,7 +93,6 @@ impl Contract {
         }
     }
 
-    #[private]
     pub fn refund_partially(
         &mut self,
         consumer_id: &ConsumerId,
@@ -137,7 +138,6 @@ impl Contract {
         }
     }
 
-    #[private]
     pub fn refund_fully(
         &mut self,
         consumer_id: &ConsumerId,
@@ -176,7 +176,6 @@ impl Contract {
         }
     }
 
-    #[private]
     pub fn deposit_to_producer(
         &mut self,
         producer_id: ProducerId,

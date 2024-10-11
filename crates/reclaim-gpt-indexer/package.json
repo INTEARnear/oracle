@@ -1,0 +1,16 @@
+{
+  "name": "reclaim-gpt-indexer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0 OR MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "near-api-js": "^5.0.1"
+  },
+  "type": "module"
+}

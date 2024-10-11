@@ -6,7 +6,11 @@ use near_sdk::{
     AccountId, CryptoHash, Gas, GasWeight, NearToken,
 };
 
-use crate::{balance::FtId, producer::ProducerId, Contract, ContractExt, StorageKey};
+use crate::{
+    balance::FtId,
+    producer::{ext_producer, ProducerId},
+    Contract, ContractExt, StorageKey,
+};
 
 const RESUMPTION_TOKEN_REGISTER: u64 = 69;
 
@@ -87,12 +91,12 @@ impl Contract {
 
     pub fn request(&mut self, producer_id: ProducerId, request_data: String) {
         let consumer_id = env::predecessor_account_id();
-        let fee = self
+        let producer = self
             .producers
             .get(&producer_id)
-            .expect("Producer doesn't exist")
-            .fee
-            .clone();
+            .expect("Producer doesn't exist");
+        let fee = producer.fee.clone();
+        let send_callback = producer.send_callback;
         if let Some(charged_fee) = self.try_charge_fee(&consumer_id, &producer_id, &fee) {
             let request_id = self.next_request_id;
             self.next_request_id = self
@@ -101,6 +105,14 @@ impl Contract {
                 .checked_add(1)
                 .expect("Overflow")
                 .into();
+
+            if send_callback {
+                ext_producer::ext(producer_id.clone()).on_request(
+                    request_id,
+                    request_data.clone(),
+                    charged_fee.clone(),
+                );
+            }
 
             let promise_idx = env::promise_yield_create(
                 "on_response",
