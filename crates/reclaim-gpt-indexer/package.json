@@ -10,7 +10,9 @@
   "license": "Apache-2.0 OR MIT",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "near-api-js": "^5.0.1"
+    "near-api-js": "^5.0.1",
+    "@reclaimprotocol/js-sdk": "^1.3.10",
+    "@reclaimprotocol/zk-fetch": "git+https://gitlab.reclaimprotocol.org/integrations/offchain/zk-fetch#58cf46cd9c24ba921099542d7254dccfc941ba42"
   },
   "type": "module"
 }
