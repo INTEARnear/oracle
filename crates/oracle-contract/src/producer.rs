@@ -1,4 +1,7 @@
-use near_sdk::{env, ext_contract, json_types::U128, log, near, serde_json, store::IterableMap, AccountId, PromiseError};
+use near_sdk::store::LookupMap;
+use near_sdk::{
+    env, ext_contract, json_types::U128, log, near, serde_json, AccountId, PromiseError,
+};
 
 use crate::{
     consumer::{ConsumerId, PendingRequest, RequestId},
@@ -25,7 +28,7 @@ pub struct Producer {
     /// within 200 blocks. 200 is a NEAR protocol-level parameter.
     pub requests_timed_out: u64,
     /// Requests that are currently being processed.
-    pub requests_pending: IterableMap<RequestId, PendingRequest>,
+    pub requests_pending: LookupMap<RequestId, PendingRequest>,
     /// Producers meant for public use may want to charge a fee.
     pub fee: ProducerFee,
     /// If true, the contract will receive `on_request(request_id,
@@ -35,12 +38,7 @@ pub struct Producer {
 
 #[ext_contract(ext_producer)]
 pub trait ProducerContract {
-    fn on_request(
-        &mut self,
-        request_id: RequestId,
-        request_data: String,
-        prepaid_fee: PrepaidFee,
-    );
+    fn on_request(&mut self, request_id: RequestId, request_data: String, prepaid_fee: PrepaidFee);
 }
 
 #[near]
@@ -50,7 +48,7 @@ impl Contract {
             account_id: account_id.clone(),
             requests_succeded: 0,
             requests_timed_out: 0,
-            requests_pending: IterableMap::new(StorageKey::PendingRequests {
+            requests_pending: LookupMap::new(StorageKey::PendingRequests {
                 producer: account_id.clone(),
             }),
             fee: ProducerFee::None,
