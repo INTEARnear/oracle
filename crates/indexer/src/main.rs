@@ -4,19 +4,21 @@ use async_trait::async_trait;
 use inindexer::{
     fastnear_data_server::FastNearDataServerProvider,
     near_indexer_primitives::{types::Balance, StreamerMessage},
-    near_utils::{dec_format, EventLogData, TESTNET_GENESIS_BLOCK_HEIGHT},
+    near_utils::{dec_format, EventLogData},
     run_indexer, AutoContinue, BlockIterator, IncompleteTransaction, Indexer, IndexerOptions,
     TransactionReceipt,
 };
 use log::LevelFilter;
-use near_api_lib::{
-    primitives::{hash::CryptoHash, types::AccountId},
-    Account, InMemorySigner, JsonRpcProvider,
-};
+use near_api::signer::secret_key::SecretKeySigner;
+use near_api::signer::Signer;
+use near_api::{Account, Contract};
+use near_gas::NearGas;
+use near_primitives::types::AccountId;
+use near_token::NearToken;
 use serde::{Deserialize, Serialize};
 
 const MODEL: &str = "gpt-4o";
-const ORACLE_CONTRACT: &str = "yielded-oracle.testnet";
+const ORACLE_CONTRACT: &str = "dev-unaudited-v0.oracle.intear.near";
 
 #[derive(Debug, Deserialize)]
 struct OracleRequestEvent {
@@ -44,6 +46,7 @@ struct Response {
 struct GptIndexer {
     model: &'static str,
     account: Account,
+    signer: Arc<Signer>,
     openai_api_key: String,
 }
 
@@ -63,19 +66,17 @@ impl Indexer for GptIndexer {
                     if event.standard == "intear-oracle"
                         && event.event == "request"
                         && event.parse_semver().map_or(false, |v| v.major == 1)
-                        && event.data.producer_id == self.account.account_id
+                        && event.data.producer_id == self.account.0
                     {
                         let msg = event.data.request_data;
                         log::info!("Request: {msg}");
-                        let account = Account::new(
-                            self.account.account_id.clone(),
-                            Arc::clone(&self.account.signer),
-                            Arc::clone(&self.account.provider),
-                        );
+
+                        let account = self.account.clone();
                         let openai_api_key = self.openai_api_key.clone();
                         let model = self.model.to_owned();
+                        let signer = self.signer.clone();
                         tokio::spawn(async move {
-                            let result: Result<CryptoHash, anyhow::Error> = async move {
+                            let result: Result<_, anyhow::Error> = async move {
                                 let response = reqwest::Client::new()
                                     .post("https://api.openai.com/v1/chat/completions")
                                     .header("Authorization", format!("Bearer {}", openai_api_key))
@@ -98,6 +99,7 @@ impl Indexer for GptIndexer {
                                     .map_err(|err| anyhow::anyhow!("Error sending request to OpenAI: {err:?}"))?
                                     .json::<serde_json::Value>()
                                     .await
+                                    // TODO this will definitely panic, better to define a struct and better error handling
                                     .map_err(|err| anyhow::anyhow!("Error parsing response from OpenAI: {err:?}"))?
                                     ["choices"]
                                     [0]
@@ -107,35 +109,29 @@ impl Indexer for GptIndexer {
                                     .unwrap()
                                     .to_owned();
                                 log::info!("Response: {response}");
-                                Ok(account
-                                    .function_call(
-                                        &ORACLE_CONTRACT.parse().unwrap(),
-                                        "respond".to_owned(),
-                                        serde_json::to_value(OracleResponse {
+                                Ok(Contract(ORACLE_CONTRACT.parse().unwrap())
+                                    .call_function(
+                                        "respond",
+                                        OracleResponse {
                                             request_id: event.data.request_id,
                                             response: Response {
                                                 response_data: response,
-                                                refund_amount: None,
+                                                refund_amount: None, // TODO price by input/output tokens?
                                             },
-                                        })
-                                        .unwrap(),
-                                        300_000_000_000_000,
-                                        0,
+                                        }
                                     )
+                                    .map_err(|err| anyhow::anyhow!("Error calling function: {err:?}"))?
+                                    .transaction()
+                                    .gas(NearGas::from_tgas(300))
+                                    .deposit(NearToken::from_yoctonear(0))
+                                    .with_signer(account.0.clone(), signer)
+                                    .with_retries(5)
+                                    .send_to_mainnet()
                                     .await
-                                    .map_err(|err| {
-                                        anyhow::anyhow!("Error signing transaction: {err:?}")
-                                    })?
-                                    .transact()
-                                    .await
-                                    .map_err(|err| {
-                                        anyhow::anyhow!("Error broadcasting transaction: {err:?}")
-                                    })?
-                                    .final_execution_outcome
-                                    .ok_or_else(|| anyhow::anyhow!("No final execution outcome"))?
-                                    .into_outcome()
+                                    .map_err(|err| anyhow::anyhow!("Error sending transaction: {err:?}"))?
                                     .transaction
-                                    .hash)
+                                    .hash
+                                )
                             }
                             .await;
                             match result {
@@ -164,34 +160,27 @@ async fn main() {
         .unwrap();
     let mut indexer = GptIndexer {
         model: MODEL,
-        account: Account::new(
+        account: Account(
             std::env::var("ACCOUNT_ID")
                 .expect("No ACCOUNT_ID environment variable")
                 .parse()
                 .expect("ACCOUNT_ID environment variable is invalid"),
-            Arc::new(InMemorySigner::from_secret_key(
-                std::env::var("ACCOUNT_ID")
-                    .expect("No ACCOUNT_ID environment variable")
-                    .parse()
-                    .expect("ACCOUNT_ID environment variable is invalid"),
-                std::env::var("PRIVATE_KEY")
-                    .expect("No PRIVATE_KEY environment variable")
-                    .parse()
-                    .expect("PRIVATE_KEY environment variable is invalid"),
-            )),
-            Arc::new(JsonRpcProvider::new("https://rpc.testnet.near.org")),
         ),
+        signer: Signer::new(SecretKeySigner::new(
+            std::env::var("PRIVATE_KEY")
+                .expect("No PRIVATE_KEY environment variable")
+                .parse()
+                .expect("PRIVATE_KEY environment variable is invalid"),
+        ))
+        .expect("Failed to create a signer"),
         openai_api_key: std::env::var("OPENAI_API_KEY")
             .expect("No OPENAI_API_KEY environment variable"),
     };
     run_indexer(
         &mut indexer,
-        FastNearDataServerProvider::testnet(),
+        FastNearDataServerProvider::mainnet(),
         IndexerOptions {
-            range: BlockIterator::AutoContinue(AutoContinue {
-                start_height_if_does_not_exist: TESTNET_GENESIS_BLOCK_HEIGHT,
-                ..Default::default()
-            }),
+            range: BlockIterator::AutoContinue(AutoContinue::default()),
             ..Default::default()
         },
     )

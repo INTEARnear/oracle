@@ -11,8 +11,11 @@ tokio = { version = "1.38.0", features = [ "rt-multi-thread", "macros" ] }
 async-trait = "0.1.80"
 simple_logger = "5.0.0"
 log = "0.4.21"
-near-api-lib = { git = "https://github.com/NEARBuilders/near-api-lib-rs" }
+near-api = "0.2.0"
 serde = { version = "1.0.203", features = [ "derive" ] }
 serde_json = "1.0.117"
 anyhow = "1.0.86"
 reqwest = { version = "0.12.4", features = [ "json" ] }
+near-gas = "0.3.0"
+near-token = "0.3.0"
+near-primitives = "0.26.0"

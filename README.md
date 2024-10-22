@@ -2,19 +2,23 @@
 
 INTEAR Oracle is a project that aims to bring off-chain computation and data availability into NEAR, with the best developer experience.
 
-It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519), which as of now, is only added as a release candidate (cutting edge tech!)
-and [inindexer](https://github.com/INTEARnear/inindexer) for receiving requests.
+It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519) and [inindexer](https://github.com/INTEARnear/inindexer) for receiving and answering requests.
 
 > Try it out!
 
-`near contract call-function as-transaction yielded-oracle.testnet request json-args '{"producer_id":"gpt4o.yielded-oracle.testnet","request_data":"Hello, GPT-4o!"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as $ACCOUNT_ID network-config testnet sign-with-keychain send`
+1. Register yourself:
+`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near register_consumer json-args '{"account_id":"<account.near>"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <account.near> network-config mainnet sign-with-keychain send`
+2. Deposit 0.01N to your fee balance (can deposit 0.1N for 10 requests):
+`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near register_consumer json-args '{"account_id":"<account.near>"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <account.near> network-config mainnet sign-with-keychain send`
+2. Request
+`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near request json-args '{"producer_id":"gpt4o.oracle.intear.near","request_data":"Hello, GPT-4o!"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <account.near> network-config mainnet sign-with-keychain send`
 
 ## Contract
 
 ### Setting up
 
 - To set up a producer that submits data on chain, use `add_producer(account_id: AccountId)` method.
-- To set up a consumer that requests data from producers, use `register_consumer(account_id: AccountId)` method.
+- To set up a consumer that requests data from producers, use `register_consumer(account_id: AccountId)` method, as well as `set_fee`.
 
 Don't forget about storage deposits.
 
