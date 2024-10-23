@@ -12,15 +12,20 @@ const ORACLE_CONTRACT_ID = process.env.ORACLE_CONTRACT_ID;
 const APP_ID = process.env.APP_ID ?? "0xF218B59D7794e32693f5D3236e011C233E249105";
 const APP_SECRET = process.env.APP_SECRET ?? "0xe7cc556f58d92618e04ebbd16744be753eb4d06d569590df341c89e25f6ecc9c";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const MAINNET = process.env.MAINNET === "true";
 
 const keyStore = new keyStores.InMemoryKeyStore();
-const config = {
+const config = MAINNET ? {
+    keyStore,
+    networkId: "mainnet",
+    nodeUrl: "https://rpc.mainnet.near.org",
+} : {
     keyStore,
     networkId: "testnet",
     nodeUrl: "https://rpc.testnet.near.org",
 };
 const near = await connect({ ...config, keyStore })
-await keyStore.setKey("testnet", OPERATOR_ACCOUNT_ID, KeyPair.fromString(OPERATOR_PRIVATE_KEY));
+await keyStore.setKey(config.networkId, OPERATOR_ACCOUNT_ID, KeyPair.fromString(OPERATOR_PRIVATE_KEY));
 const account = await near.account(OPERATOR_ACCOUNT_ID);
 
 let currentBlock = await fs.readFile("last-processed-block.txt", "utf-8").catch(() => "42376888");
@@ -32,7 +37,7 @@ async function sleep(ms) {
 }
 while (true) {
     try {
-        await fetch(`https://testnet.neardata.xyz/v0/block/${currentBlock}`, {
+        await fetch(MAINNET ? `https://mainnet.neardata.xyz/v0/block/${currentBlock}` : `https://testnet.neardata.xyz/v0/block/${currentBlock}`, {
             headers: {
                 "User-Agent": `Intear Reclaim oracle indexer`
             },
