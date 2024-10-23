@@ -33,9 +33,11 @@ impl Contract {
     pub fn submit(&mut self, request_id: RequestId, proof: Proof) {
         ext_reclaim::ext(self.reclaim_contract.clone())
             .verify_proof(proof.clone())
-            .then(Self::ext(env::current_account_id())
-                .with_static_gas(Gas::from_tgas(100))
-                .on_verified(request_id, proof));
+            .then(
+                Self::ext(env::current_account_id())
+                    .with_static_gas(Gas::from_tgas(100))
+                    .on_verified(request_id, proof),
+            );
     }
 
     #[private]
@@ -120,6 +122,9 @@ impl Contract {
 #[near]
 impl ProducerContract for Contract {
     fn on_request(&mut self, request_id: RequestId, request_data: String, prepaid_fee: PrepaidFee) {
+        if env::predecessor_account_id() != self.oracle_contract {
+            env::panic_str("Only oracle contract can call this method");
+        }
         let request: GptRequest = near_sdk::serde_json::from_str(&request_data).unwrap();
         self.requests.insert(request_id, (request, prepaid_fee));
     }

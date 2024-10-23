@@ -1,4 +1,8 @@
-use near_sdk::{ext_contract, json_types::{U128, U64}, near, AccountId, NearToken};
+use near_sdk::{
+    ext_contract,
+    json_types::{U128, U64},
+    near, AccountId, NearToken,
+};
 
 #[ext_contract(ext_oracle)]
 pub trait Oracle {
@@ -14,12 +18,7 @@ pub struct Response {
 }
 
 pub trait ProducerContract {
-    fn on_request(
-        &mut self,
-        request_id: RequestId,
-        request_data: String,
-        prepaid_fee: PrepaidFee,
-    );
+    fn on_request(&mut self, request_id: RequestId, request_data: String, prepaid_fee: PrepaidFee);
 }
 
 #[near(serializers=[borsh, json])]
