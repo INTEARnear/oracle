@@ -36,7 +36,7 @@ impl Contract {
             .then(
                 Self::ext(env::current_account_id())
                     .with_static_gas(Gas::from_tgas(100))
-                    .on_verified(request_id, proof),
+                    .on_verified(request_id, proof, env::predecessor_account_id()),
             );
     }
 
@@ -45,6 +45,7 @@ impl Contract {
         &mut self,
         request_id: RequestId,
         proof: Proof,
+        sender_account_id: AccountId,
         #[callback_result] result: Result<(), PromiseError>,
     ) -> Promise {
         if let Err(e) = result {
@@ -58,7 +59,10 @@ impl Contract {
         let matches = parameters.response_matches.first().unwrap();
         require!(matches.r#type == "contains", "Invalid proof");
 
-        let (request, prepaid_fee) = self.requests.get(&request_id).expect("Request not found");
+        let (request, prepaid_fee) = self
+            .requests
+            .remove(&request_id)
+            .expect("Request not found");
 
         let http_request: OpenAiRequest = near_sdk::serde_json::from_str(
             &parameters.body.expect("Request does not contain body"),
@@ -115,6 +119,7 @@ impl Contract {
             response_data: near_sdk::serde_json::to_string(&result).unwrap(),
             refund_amount: Some(U128(refund_amount)),
         };
+        Promise::new(sender_account_id).transfer(NearToken::from_yoctonear(price_near));
         ext_oracle::ext(self.oracle_contract.clone()).respond(request_id, response)
     }
 }
