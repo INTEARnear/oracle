@@ -1,7 +1,7 @@
 name: NEAR Protocol Rewards Tracking
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    - cron: '0 */12 * * *'  # Every 12 hours
   workflow_dispatch:        # Manual trigger
   push:
     branches: [ main ]     # Start on main branch updates
@@ -14,9 +14,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
-      - name: Install SDK
-        run: npm install near-protocol-rewards
 
       - name: Run Metrics Collection
         env:
