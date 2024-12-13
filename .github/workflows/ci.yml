@@ -16,13 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libudev-dev pkg-config
+      
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
           
       - name: Install cargo-near
-        run: "curl --proto '=https' --tlsv1.2 -LsSf https://github.com/near/cargo-near/releases/download/cargo-near-v0.12.2/cargo-near-installer.sh | sh"
+        run: cargo install cargo-near
           
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
