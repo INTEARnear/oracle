@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 
 [package.metadata.near.reproducible_build]
 # docker image, descriptor of build environment
-image = "sourcescan/cargo-near:0.10.0-rust-1.81.0"
+image = "sourcescan/cargo-near:0.12.2-rust-1.82.0"
 # tag after colon above serves only descriptive purpose; image is identified by digest
 image_digest = "sha256:5013a742e19a95c108bdfce085a57bda2f1047248e5eb9f005a8adc1ec8a1e42"
 # build command inside of docker container 
