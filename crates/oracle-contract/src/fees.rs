@@ -1,6 +1,8 @@
 use near_sdk::{env, json_types::U128, near, NearToken, Promise};
 
-use crate::{balance::FtId, consumer::ConsumerId, producer::ProducerId, Oracle, OracleExt};
+use crate::{balance::FtId, consumer::ConsumerId, producer::ProducerId};
+#[cfg(feature = "contract")]
+use crate::{Oracle, OracleExt};
 
 /// Fees are set by producers. If the consumer's balance is less
 /// than prepaid_amount, the request will be rejected without a log generated.
@@ -39,6 +41,7 @@ pub enum PaymentType {
     AttachedToCall,
 }
 
+#[cfg(feature = "contract")]
 #[near]
 impl Oracle {
     pub fn get_fee(&self, producer_id: &ProducerId) -> Option<ProducerFee> {
@@ -55,6 +58,7 @@ impl Oracle {
     }
 }
 
+#[cfg(feature = "contract")]
 impl Oracle {
     pub fn try_charge_fee(
         &mut self,

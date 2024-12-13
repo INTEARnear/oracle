@@ -2,11 +2,15 @@ use near_sdk::{
     env, json_types::U128, log, near, serde_json, AccountId, Gas, NearToken, Promise,
     PromiseOrValue,
 };
+use near_sdk_contract_tools::ft::Nep141Receiver;
 
-use crate::{producer::ProducerId, Oracle, OracleExt};
+use crate::producer::ProducerId;
+#[cfg(feature = "contract")]
+use crate::{Oracle, OracleExt};
 
 pub type FtId = AccountId;
 
+#[cfg(feature = "contract")]
 #[near]
 impl Oracle {
     #[payable]
@@ -177,20 +181,10 @@ struct FtDepositArgs {
     pub producer_id: Option<ProducerId>,
 }
 
-// TODO: Can't use git near-sdk with near-sdk-contract-tools
-//
-// impl Nep141Receiver for Contract {
-//     fn ft_on_transfer(
-//         &mut self,
-//         sender_id: AccountId,
-//         amount: U128,
-//         msg: String,
-//     ) -> PromiseOrValue<U128> {
-//
-//     }
-// }
-impl Oracle {
-    pub fn ft_on_transfer(
+#[cfg(feature = "contract")]
+#[near]
+impl Nep141Receiver for Oracle {
+    fn ft_on_transfer(
         &mut self,
         sender_id: AccountId,
         amount: U128,

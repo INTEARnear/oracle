@@ -6,8 +6,10 @@ use near_sdk::{
 use crate::{
     consumer::{ConsumerId, PendingRequest, RequestId},
     fees::{PrepaidFee, ProducerFee},
-    Oracle, OracleExt, StorageKey,
+    StorageKey,
 };
+#[cfg(feature = "contract")]
+use crate::{Oracle, OracleExt};
 
 pub type ProducerId = AccountId;
 
@@ -41,6 +43,7 @@ pub trait ProducerContract {
     fn on_request(&mut self, request_id: RequestId, request_data: String, prepaid_fee: PrepaidFee);
 }
 
+#[cfg(feature = "contract")]
 #[near]
 impl Oracle {
     pub fn add_producer(&mut self, account_id: ProducerId) {
@@ -107,6 +110,7 @@ pub trait OracleResponder {
     fn respond(&mut self, request_id: RequestId, response: Response);
 }
 
+#[cfg(feature = "contract")]
 #[near]
 impl OracleResponder for Oracle {
     fn respond(&mut self, request_id: RequestId, response: Response) {

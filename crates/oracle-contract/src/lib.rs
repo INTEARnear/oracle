@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "contract"), allow(unused_imports, dead_code))]
+
 pub mod balance;
 pub mod consumer;
 pub mod fees;
@@ -31,6 +33,7 @@ enum StorageKey {
 }
 
 // TODO: Storage management
+#[cfg(feature = "contract")]
 #[near(contract_state)]
 pub struct Oracle {
     producers: LookupMap<ProducerId, Producer>,
@@ -38,6 +41,7 @@ pub struct Oracle {
     next_request_id: RequestId,
 }
 
+#[cfg(feature = "contract")]
 impl Default for Oracle {
     fn default() -> Self {
         Self {

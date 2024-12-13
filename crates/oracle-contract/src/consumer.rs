@@ -9,8 +9,10 @@ use near_sdk::{
 use crate::{
     balance::FtId,
     producer::{ext_producer, ProducerId},
-    Oracle, OracleExt, StorageKey,
+    StorageKey,
 };
+#[cfg(feature = "contract")]
+use crate::{Oracle, OracleExt};
 
 const RESUMPTION_TOKEN_REGISTER: u64 = 69;
 
@@ -64,6 +66,7 @@ pub struct RequestEventV1 {
     pub request_data: String,
 }
 
+#[cfg(feature = "contract")]
 #[near]
 impl Oracle {
     pub fn register_consumer(&mut self, account_id: ConsumerId) {
