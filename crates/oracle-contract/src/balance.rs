@@ -3,12 +3,12 @@ use near_sdk::{
     PromiseOrValue,
 };
 
-use crate::{producer::ProducerId, Contract, ContractExt};
+use crate::{producer::ProducerId, Oracle, OracleExt};
 
 pub type FtId = AccountId;
 
 #[near]
-impl Contract {
+impl Oracle {
     #[payable]
     pub fn deposit_near(&mut self, account_id: Option<AccountId>, producer_id: Option<ProducerId>) {
         let amount = env::attached_deposit();
@@ -189,7 +189,7 @@ struct FtDepositArgs {
 //
 //     }
 // }
-impl Contract {
+impl Oracle {
     pub fn ft_on_transfer(
         &mut self,
         sender_id: AccountId,

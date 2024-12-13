@@ -1,6 +1,6 @@
 use near_sdk::{env, json_types::U128, near, NearToken, Promise};
 
-use crate::{balance::FtId, consumer::ConsumerId, producer::ProducerId, Contract, ContractExt};
+use crate::{balance::FtId, consumer::ConsumerId, producer::ProducerId, Oracle, OracleExt};
 
 /// Fees are set by producers. If the consumer's balance is less
 /// than prepaid_amount, the request will be rejected without a log generated.
@@ -16,7 +16,7 @@ pub enum ProducerFee {
 
 /// A fee that the consumer has paid for a request. Can be partially
 /// refunded by the producer in response.
-#[near(serializers=[json])]
+#[near(serializers=[json, borsh])]
 #[derive(Clone)]
 pub enum PrepaidFee {
     None,
@@ -32,7 +32,7 @@ pub enum PrepaidFee {
 }
 
 #[near]
-impl Contract {
+impl Oracle {
     pub fn get_fee(&self, producer_id: &ProducerId) -> Option<ProducerFee> {
         self.producers
             .get(producer_id)
@@ -47,7 +47,7 @@ impl Contract {
     }
 }
 
-impl Contract {
+impl Oracle {
     pub fn try_charge_fee(
         &mut self,
         consumer_id: &ConsumerId,

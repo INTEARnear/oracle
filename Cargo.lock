@@ -2732,6 +2732,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "intear-oracle"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+ "near-sdk-contract-tools",
+ "near-workspaces 0.15.0",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "interactive-clap"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4754,17 +4765,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
-name = "oracle-contract"
-version = "0.1.0"
-dependencies = [
- "near-sdk",
- "near-sdk-contract-tools",
- "near-workspaces 0.15.0",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "ordered-float"
 version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5277,6 +5277,7 @@ dependencies = [
 name = "reclaim-gpt-contract"
 version = "0.1.1"
 dependencies = [
+ "intear-oracle",
  "near-sdk",
  "near-workspaces 0.10.1",
  "serde_json",

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use near_sdk::NearToken;
-use oracle_contract::fees::ProducerFee;
+use intear_oracle::fees::ProducerFee;
 use serde_json::json;
 
 #[tokio::test]

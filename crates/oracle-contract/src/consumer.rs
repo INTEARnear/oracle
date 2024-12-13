@@ -9,7 +9,7 @@ use near_sdk::{
 use crate::{
     balance::FtId,
     producer::{ext_producer, ProducerId},
-    Contract, ContractExt, StorageKey,
+    Oracle, OracleExt, StorageKey,
 };
 
 const RESUMPTION_TOKEN_REGISTER: u64 = 69;
@@ -65,7 +65,7 @@ pub struct RequestEventV1 {
 }
 
 #[near]
-impl Contract {
+impl Oracle {
     pub fn register_consumer(&mut self, account_id: ConsumerId) {
         let consumer = Consumer {
             account_id: account_id.clone(),

@@ -1,5 +1,6 @@
 use near_sdk::{ext_contract, near};
 
+#[allow(dead_code)]
 #[ext_contract(ext_reclaim)]
 pub trait Reclaim {
     #[handle_result]

@@ -1,14 +1,15 @@
-mod oracle;
 mod reclaim;
 
 use std::collections::HashMap;
 
+use intear_oracle::consumer::RequestId;
+use intear_oracle::fees::PrepaidFee;
+use intear_oracle::producer::{ext_oracle_responder, ProducerContract, Response};
 use near_sdk::Gas;
 use near_sdk::{
     env, json_types::U128, near, require, store::LookupMap, AccountId, NearToken, PanicOnDefault,
     Promise, PromiseError,
 };
-use oracle::{ext_oracle, PrepaidFee, ProducerContract, RequestId};
 use reclaim::{ext_reclaim, Proof};
 
 #[near(contract_state)]
@@ -115,12 +116,12 @@ impl Contract {
             None => env::panic_str("Insufficient fee"),
         };
 
-        let response = oracle::Response {
+        let response = Response {
             response_data: near_sdk::serde_json::to_string(&result).unwrap(),
             refund_amount: Some(U128(refund_amount)),
         };
         Promise::new(sender_account_id).transfer(NearToken::from_yoctonear(price_near));
-        ext_oracle::ext(self.oracle_contract.clone()).respond(request_id, response)
+        ext_oracle_responder::ext(self.oracle_contract.clone()).respond(request_id, response)
     }
 }
 

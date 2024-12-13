@@ -6,7 +6,7 @@ use near_sdk::{
 use crate::{
     consumer::{ConsumerId, PendingRequest, RequestId},
     fees::{PrepaidFee, ProducerFee},
-    Contract, ContractExt, StorageKey,
+    Oracle, OracleExt, StorageKey,
 };
 
 pub type ProducerId = AccountId;
@@ -42,7 +42,7 @@ pub trait ProducerContract {
 }
 
 #[near]
-impl Contract {
+impl Oracle {
     pub fn add_producer(&mut self, account_id: ProducerId) {
         let producer = Producer {
             account_id: account_id.clone(),
@@ -99,8 +99,16 @@ impl Contract {
         }
         response.ok()
     }
+}
 
-    pub fn respond(&mut self, request_id: RequestId, response: Response) {
+#[ext_contract(ext_oracle_responder)]
+pub trait OracleResponder {
+    fn respond(&mut self, request_id: RequestId, response: Response);
+}
+
+#[near]
+impl OracleResponder for Oracle {
+    fn respond(&mut self, request_id: RequestId, response: Response) {
         let producer_id = env::predecessor_account_id();
         let producer = self
             .producers

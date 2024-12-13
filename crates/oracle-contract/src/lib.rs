@@ -32,13 +32,13 @@ enum StorageKey {
 
 // TODO: Storage management
 #[near(contract_state)]
-pub struct Contract {
+pub struct Oracle {
     producers: LookupMap<ProducerId, Producer>,
     consumers: LookupMap<ConsumerId, Consumer>,
     next_request_id: RequestId,
 }
 
-impl Default for Contract {
+impl Default for Oracle {
     fn default() -> Self {
         Self {
             producers: LookupMap::new(StorageKey::Producers),
