@@ -1,3 +1,4 @@
+#![allow(clippy::bool_assert_comparison)]
 use serde_json::json;
 
 #[tokio::test]
@@ -15,7 +16,7 @@ async fn register_consumer() -> Result<(), Box<dyn std::error::Error>> {
             "account_id": consumer_account.id(),
         }))
         .await?;
-    assert_eq!(outcome.json::<bool>().unwrap(), false);
+    assert!(!outcome.json::<bool>().unwrap());
 
     let outcome = consumer_account
         .call(contract.id(), "register_consumer")
@@ -32,7 +33,7 @@ async fn register_consumer() -> Result<(), Box<dyn std::error::Error>> {
             "account_id": consumer_account.id(),
         }))
         .await?;
-    assert_eq!(outcome.json::<bool>().unwrap(), true);
+    assert!(outcome.json::<bool>().unwrap());
 
     Ok(())
 }
@@ -52,7 +53,7 @@ async fn register_producer() -> Result<(), Box<dyn std::error::Error>> {
             "account_id": producer_account.id(),
         }))
         .await?;
-    assert_eq!(outcome.json::<bool>().unwrap(), false);
+    assert!(!outcome.json::<bool>().unwrap());
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
@@ -69,7 +70,7 @@ async fn register_producer() -> Result<(), Box<dyn std::error::Error>> {
             "account_id": producer_account.id(),
         }))
         .await?;
-    assert_eq!(outcome.json::<bool>().unwrap(), true);
+    assert!(outcome.json::<bool>().unwrap());
 
     Ok(())
 }

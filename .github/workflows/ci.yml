@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          
+      - name: Install cargo-near
+        run: cargo install cargo-near
+          
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+        
+      - name: Check with clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        
+      - name: Run tests
+        run: cargo test --all
+        
+      - name: Build all crates
+        run: cargo build --all-features
+        
+      - name: Build NEAR contracts
+        run: |
+          cd crates/oracle-contract && cargo near build --no-docker
+          cd ../reclaim-gpt-contract && cargo near build --no-docker

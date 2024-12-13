@@ -9,9 +9,9 @@ use inindexer::{
     TransactionReceipt,
 };
 use log::LevelFilter;
+use near_api::prelude::{Account, Contract};
 use near_api::signer::secret_key::SecretKeySigner;
 use near_api::signer::Signer;
-use near_api::prelude::{Account, Contract};
 use near_gas::NearGas;
 use near_primitives::types::AccountId;
 use near_token::NearToken;

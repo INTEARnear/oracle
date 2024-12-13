@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use near_sdk::NearToken;
 use intear_oracle::fees::ProducerFee;
+use near_sdk::NearToken;
 use serde_json::json;
 
 #[tokio::test]
@@ -90,7 +90,7 @@ async fn no_fee() -> Result<(), Box<dyn std::error::Error>> {
         NearToken::from_near(1)
     );
 
-    let _ = tokio::spawn(
+    tokio::spawn(
         consumer_account
             .call(contract.id(), "request")
             .args_json(json!({
@@ -209,7 +209,7 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
         NearToken::from_near(1)
     );
 
-    let _ = tokio::spawn(
+    tokio::spawn(
         consumer_account
             .call(contract.id(), "request")
             .args_json(json!({
@@ -361,7 +361,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
         NearToken::from_near(1)
     );
 
-    let _ = tokio::spawn(
+    tokio::spawn(
         consumer_account
             .call(contract.id(), "request")
             .args_json(json!({

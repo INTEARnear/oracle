@@ -30,7 +30,7 @@ async fn cannot_send_two_responses() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     assert!(outcome.is_success());
 
-    let _ = tokio::spawn(
+    tokio::spawn(
         consumer_account
             .call(contract.id(), "request")
             .args_json(json!({
