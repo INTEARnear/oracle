@@ -35,16 +35,16 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
         
-      - name: Check with clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
-        
-      - name: Run tests
-        run: cargo test --all
-        
-      - name: Build all crates
-        run: cargo build --all-features
-        
       - name: Build NEAR contracts
         run: |
           cd crates/oracle-contract && cargo near build --no-docker
           cd ../reclaim-gpt-contract && cargo near build --no-docker
+        
+      - name: Check with clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        
+      - name: Build all crates
+        run: cargo build --all-features
+        
+      - name: Run tests
+        run: cargo test --all -- --test-threads=1
