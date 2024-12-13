@@ -17,18 +17,26 @@ pub enum ProducerFee {
 /// A fee that the consumer has paid for a request. Can be partially
 /// refunded by the producer in response.
 #[near(serializers=[json, borsh])]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum PrepaidFee {
     None,
     Near {
         amount: NearToken,
-        is_for_specific_producer: bool,
+        payment_type: PaymentType,
     },
     FungibleToken {
         token: FtId,
         amount: U128,
-        is_for_specific_producer: bool,
+        payment_type: PaymentType,
     },
+}
+
+#[near(serializers=[json, borsh])]
+#[derive(Debug, Clone, PartialEq)]
+pub enum PaymentType {
+    ForSpecificProducer,
+    ForAllProducers,
+    AttachedToCall,
 }
 
 #[near]
@@ -55,8 +63,20 @@ impl Oracle {
         fee: &ProducerFee,
     ) -> Option<PrepaidFee> {
         match fee {
-            ProducerFee::None => Some(PrepaidFee::None),
+            ProducerFee::None => {
+                if !env::attached_deposit().is_zero() {
+                    panic!("No fee is required, but NEAR attached");
+                }
+                Some(PrepaidFee::None)
+            }
             ProducerFee::Near { prepaid_amount } => {
+                if !env::attached_deposit().is_zero() {
+                    return Some(PrepaidFee::Near {
+                        amount: env::attached_deposit(),
+                        payment_type: PaymentType::AttachedToCall,
+                    });
+                }
+
                 let consumer = self
                     .consumers
                     .get_mut(consumer_id)
@@ -70,7 +90,7 @@ impl Oracle {
                         }
                         return Some(PrepaidFee::Near {
                             amount: *prepaid_amount,
-                            is_for_specific_producer: true,
+                            payment_type: PaymentType::ForSpecificProducer,
                         });
                     }
                 }
@@ -80,7 +100,7 @@ impl Oracle {
                         consumer.near_balance.checked_sub(*prepaid_amount).unwrap();
                     return Some(PrepaidFee::Near {
                         amount: *prepaid_amount,
-                        is_for_specific_producer: false,
+                        payment_type: PaymentType::ForAllProducers,
                     });
                 }
 
@@ -104,36 +124,44 @@ impl Oracle {
             PrepaidFee::None => {}
             PrepaidFee::Near {
                 amount: _,
-                is_for_specific_producer,
+                payment_type,
             } => {
                 let consumer = self
                     .consumers
                     .get_mut(consumer_id)
                     .expect("Consumer is not registered");
 
-                if *is_for_specific_producer {
-                    if let Some(near_balance) = consumer.near_balance_producer.get_mut(producer_id)
-                    {
-                        *near_balance = near_balance
+                match payment_type {
+                    PaymentType::ForSpecificProducer => {
+                        if let Some(near_balance) =
+                            consumer.near_balance_producer.get_mut(producer_id)
+                        {
+                            *near_balance = near_balance
+                                .checked_add(NearToken::from_yoctonear(refund_amount.0))
+                                .unwrap();
+                        } else {
+                            consumer.near_balance_producer.insert(
+                                producer_id.clone(),
+                                NearToken::from_yoctonear(refund_amount.0),
+                            );
+                        }
+                    }
+                    PaymentType::ForAllProducers => {
+                        consumer.near_balance = consumer
+                            .near_balance
                             .checked_add(NearToken::from_yoctonear(refund_amount.0))
                             .unwrap();
-                    } else {
-                        consumer.near_balance_producer.insert(
-                            producer_id.clone(),
-                            NearToken::from_yoctonear(refund_amount.0),
-                        );
                     }
-                } else {
-                    consumer.near_balance = consumer
-                        .near_balance
-                        .checked_add(NearToken::from_yoctonear(refund_amount.0))
-                        .unwrap();
+                    PaymentType::AttachedToCall => {
+                        Promise::new(consumer_id.clone())
+                            .transfer(NearToken::from_yoctonear(refund_amount.0));
+                    }
                 }
             }
             PrepaidFee::FungibleToken {
                 token: _,
                 amount: _,
-                is_for_specific_producer: _,
+                payment_type: _,
             } => unimplemented!(),
         }
     }
@@ -148,30 +176,37 @@ impl Oracle {
             PrepaidFee::None => {}
             PrepaidFee::Near {
                 amount,
-                is_for_specific_producer,
+                payment_type,
             } => {
                 let consumer = self
                     .consumers
                     .get_mut(consumer_id)
                     .expect("Consumer is not registered");
 
-                if *is_for_specific_producer {
-                    if let Some(near_balance) = consumer.near_balance_producer.get_mut(producer_id)
-                    {
-                        *near_balance = near_balance.checked_add(*amount).unwrap();
-                    } else {
-                        consumer
-                            .near_balance_producer
-                            .insert(producer_id.clone(), *amount);
+                match payment_type {
+                    PaymentType::ForSpecificProducer => {
+                        if let Some(near_balance) =
+                            consumer.near_balance_producer.get_mut(producer_id)
+                        {
+                            *near_balance = near_balance.checked_add(*amount).unwrap();
+                        } else {
+                            consumer
+                                .near_balance_producer
+                                .insert(producer_id.clone(), *amount);
+                        }
                     }
-                } else {
-                    consumer.near_balance = consumer.near_balance.checked_add(*amount).unwrap();
+                    PaymentType::ForAllProducers => {
+                        consumer.near_balance = consumer.near_balance.checked_add(*amount).unwrap();
+                    }
+                    PaymentType::AttachedToCall => {
+                        Promise::new(consumer_id.clone()).transfer(*amount);
+                    }
                 }
             }
             PrepaidFee::FungibleToken {
                 token: _,
                 amount: _,
-                is_for_specific_producer: _,
+                payment_type: _,
             } => unimplemented!(),
         }
     }
@@ -186,7 +221,7 @@ impl Oracle {
             PrepaidFee::None => {}
             PrepaidFee::Near {
                 amount,
-                is_for_specific_producer: _,
+                payment_type: _,
             } => {
                 if let Some(deposit_amount) = amount.checked_sub(NearToken::from_yoctonear(
                     refund_amount.unwrap_or(U128(0)).0,
@@ -199,7 +234,7 @@ impl Oracle {
             PrepaidFee::FungibleToken {
                 token: _,
                 amount: _,
-                is_for_specific_producer: _,
+                payment_type: _,
             } => unimplemented!(),
         }
     }

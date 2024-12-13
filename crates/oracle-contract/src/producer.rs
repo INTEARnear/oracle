@@ -83,9 +83,10 @@ impl Oracle {
             .get_mut(&producer_id)
             .expect("Producer doesn't exist");
         log!(
-            "Response from {producer_id} for {request_id}: {response:?}",
+            "Response from {producer_id} for {request_id}: {response:?}, refund {refund:?}",
             request_id = request_id.0,
-            response = response.as_ref().map(|r| &r.response_data)
+            response = response.as_ref().map(|r| &r.response_data),
+            refund = response.as_ref().map(|r| &r.refund_amount),
         );
         if let Ok(response) = response.as_ref() {
             producer.requests_succeded += 1;
@@ -115,12 +116,15 @@ impl OracleResponder for Oracle {
             .get_mut(&producer_id)
             .expect("Producer is not registered");
         if let Some(pending_request) = producer.requests_pending.remove(&request_id) {
+            log!("1");
             if !env::promise_yield_resume(
                 &pending_request.resumption_token,
                 &serde_json::to_vec(&response).expect("Can't serialize on_response args"),
             ) {
+                log!("2");
                 env::panic_str("Resumption token not found")
             }
+            log!("3");
         } else {
             env::panic_str("Request not found or already responded to")
         }

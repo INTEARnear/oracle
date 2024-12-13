@@ -18,7 +18,7 @@ async fn near_deposits() -> Result<(), Box<dyn std::error::Error>> {
         }))
         .transact()
         .await?;
-    assert!(dbg!(&outcome).is_success());
+    assert!(outcome.is_success());
 
     let outcome = consumer_account
         .view(contract.id(), "get_deposit_near")

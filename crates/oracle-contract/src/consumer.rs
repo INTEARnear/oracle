@@ -89,6 +89,7 @@ impl Oracle {
         self.consumers.contains_key(account_id)
     }
 
+    #[payable]
     pub fn request(&mut self, producer_id: ProducerId, request_data: String) {
         let consumer_id = env::predecessor_account_id();
         let producer = self

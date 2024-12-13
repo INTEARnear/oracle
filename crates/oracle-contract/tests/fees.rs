@@ -396,6 +396,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
         .transact()
         .await?;
     assert!(outcome.is_success());
+    sandbox.fast_forward(1).await?; // yield resume takes 1 block
 
     let outcome = producer_account
         .view(contract.id(), "get_deposit_near")
@@ -418,3 +419,74 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn direct_near_fee() -> Result<(), Box<dyn std::error::Error>> {
+    let sandbox = near_workspaces::sandbox().await?;
+    let contract_wasm = near_workspaces::compile_project("./").await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+
+    let producer_account = sandbox.dev_create_account().await?;
+    let producer_initial_balance = producer_account.view_account().await?.balance;
+
+    let outcome = producer_account
+        .call(contract.id(), "add_producer")
+        .args_json(json!({
+            "account_id": producer_account.id(),
+        }))
+        .transact()
+        .await?;
+    assert!(outcome.is_success());
+
+    let consumer_account = sandbox.dev_create_account().await?;
+    let consumer_initial_balance = consumer_account.view_account().await?.balance;
+    let outcome = consumer_account
+        .call(contract.id(), "register_consumer")
+        .args_json(json!({
+            "account_id": consumer_account.id(),
+        }))
+        .transact()
+        .await?;
+    assert!(outcome.is_success());
+
+    tokio::spawn(
+        consumer_account
+            .call(contract.id(), "request")
+            .args_json(json!({
+                "producer_id": producer_account.id(),
+                "request_data": "Hello World!",
+            }))
+            .deposit(NearToken::from_millinear(10)) // 0.01 NEAR
+            .transact(),
+    );
+    tokio::time::sleep(Duration::from_secs(5)).await;
+
+    let outcome = producer_account
+        .call(contract.id(), "respond")
+        .args_json(json!({
+            "request_id": "0",
+            "response": {
+                "response_data": "Hello World",
+                "refund_amount": NearToken::from_millinear(10).as_yoctonear().to_string(), // 0.005 NEAR
+            }
+        }))
+        .max_gas()
+        .transact()
+        .await?;
+    assert!(outcome.is_success());
+
+    let producer_new_balance = producer_account.view_account().await?.balance;
+    assert!(
+        producer_new_balance
+            .checked_sub(producer_initial_balance)
+            .unwrap()
+            > NearToken::from_millinear(5) // Should receive the 0.005 NEAR fee
+    );
+
+    let consumer_new_balance = consumer_account.view_account().await?.balance;
+    assert!(consumer_initial_balance.as_millinear() - consumer_new_balance.as_millinear() > 5);
+
+    Ok(())
+}
+
+// TODO more refund tests
