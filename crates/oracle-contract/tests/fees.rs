@@ -502,14 +502,6 @@ async fn direct_near_fee() -> Result<(), Box<dyn std::error::Error>> {
 
     let consumer_account = sandbox.dev_create_account().await?;
     let consumer_initial_balance = consumer_account.view_account().await?.balance;
-    let outcome = consumer_account
-        .call(contract.id(), "register_consumer")
-        .args_json(json!({
-            "account_id": consumer_account.id(),
-        }))
-        .transact()
-        .await?;
-    assert!(outcome.is_success());
 
     let request = consumer_account
         .call(contract.id(), "request")
