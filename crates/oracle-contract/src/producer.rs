@@ -116,15 +116,12 @@ impl OracleResponder for Oracle {
             .get_mut(&producer_id)
             .expect("Producer is not registered");
         if let Some(pending_request) = producer.requests_pending.remove(&request_id) {
-            log!("1");
             if !env::promise_yield_resume(
                 &pending_request.resumption_token,
                 &serde_json::to_vec(&response).expect("Can't serialize on_response args"),
             ) {
-                log!("2");
                 env::panic_str("Resumption token not found")
             }
-            log!("3");
         } else {
             env::panic_str("Request not found or already responded to")
         }
