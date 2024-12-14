@@ -7,20 +7,13 @@ repository = "https://github.com/INTEARnear/oracle"
 license = "MIT OR Apache-2.0"
 
 [package.metadata.near.reproducible_build]
-# docker image, descriptor of build environment
 image = "sourcescan/cargo-near:0.12.2-rust-1.82.0"
-# tag after colon above serves only descriptive purpose; image is identified by digest
 image_digest = "sha256:5013a742e19a95c108bdfce085a57bda2f1047248e5eb9f005a8adc1ec8a1e42"
-# build command inside of docker container 
-# if docker image from default gallery is used https://hub.docker.com/r/sourcescan/cargo-near/tags,
-# the command may be any combination of flags of `cargo-near`,
-# supported by respective version of binary inside the container besides `--no-locked` flag
 container_build_command = ["cargo", "near", "build"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 near-sdk = "5.5"
 near-sdk-contract-tools = "3.0.2"

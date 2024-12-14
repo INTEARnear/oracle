@@ -5,7 +5,7 @@ use serde_json::json;
 #[tokio::test]
 async fn cannot_send_two_responses() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = crate::get_contract_wasm().await;
 
     let contract = sandbox.dev_deploy(contract_wasm).await?;
 

@@ -2,7 +2,7 @@ use near_sdk::{
     env, json_types::U128, log, near, serde_json, AccountId, Gas, NearToken, Promise,
     PromiseOrValue,
 };
-use near_sdk_contract_tools::ft::Nep141Receiver;
+use near_sdk_contract_tools::ft::{ext_nep141, Nep141Receiver};
 
 use crate::producer::ProducerId;
 #[cfg(feature = "contract")]
@@ -161,17 +161,11 @@ impl Oracle {
                 amount = amount.0
             );
         }
-        // TODO replace with high-level call when not using git near-sdk
-        Promise::new(ft_id).function_call(
-            "ft_transfer".to_string(),
-            serde_json::to_vec(&serde_json::json!({
-                "amount": amount,
-                "receiver_id": account_id,
-            }))
-            .unwrap(),
-            NearToken::from_near(0),
-            Gas::from_tgas(10),
-        );
+
+        ext_nep141::ext(ft_id)
+            .with_static_gas(Gas::from_tgas(10))
+            .with_attached_deposit(NearToken::from_yoctonear(1))
+            .ft_transfer(account_id, amount, None);
     }
 }
 
