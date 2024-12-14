@@ -6,7 +6,7 @@ async fn near_deposits() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
     let initial_balance = consumer_account.view_account().await?.balance;
@@ -140,7 +140,7 @@ async fn near_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
     let producer_account = sandbox.dev_create_account().await?;
@@ -236,9 +236,9 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
     let token = sandbox
-        .dev_deploy(&crate::get_ft_contract_wasm().await)
+        .dev_deploy(crate::get_ft_contract_wasm().await)
         .await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
@@ -253,7 +253,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -263,7 +263,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -273,7 +273,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "mint")
+        .call(token.id(), "mint")
         .args_json(json!({
             "account_id": consumer_account.id(),
             "amount": "1000000000000000000000000000",
@@ -283,7 +283,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -303,7 +303,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(outcome.json::<String>().unwrap(), "0");
 
     let outcome = consumer_account
-        .call(&token.id(), "ft_transfer_call")
+        .call(token.id(), "ft_transfer_call")
         .args_json(json!({
             "receiver_id": contract.id(),
             "amount": "1000000000000000000000000",
@@ -316,7 +316,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -327,7 +327,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -361,7 +361,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -372,7 +372,7 @@ async fn ft_deposits() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -402,9 +402,9 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
     let token = sandbox
-        .dev_deploy(&crate::get_ft_contract_wasm().await)
+        .dev_deploy(crate::get_ft_contract_wasm().await)
         .await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
@@ -420,7 +420,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -430,7 +430,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -440,7 +440,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "mint")
+        .call(token.id(), "mint")
         .args_json(json!({
             "account_id": consumer_account.id(),
             "amount": "1000000000000000000000000000",
@@ -450,7 +450,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -480,7 +480,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert_eq!(outcome.json::<String>().unwrap(), "0");
 
     let outcome = consumer_account
-        .call(&token.id(), "ft_transfer_call")
+        .call(token.id(), "ft_transfer_call")
         .max_gas()
         .args_json(json!({
             "receiver_id": contract.id(),
@@ -493,7 +493,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -504,7 +504,7 @@ async fn ft_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let outcome = consumer_account
-        .view(&token.id(), "ft_balance_of")
+        .view(token.id(), "ft_balance_of")
         .args_json(json!({
             "account_id": contract.id(),
         }))
