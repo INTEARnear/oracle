@@ -8,7 +8,7 @@ async fn no_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
 
@@ -152,7 +152,7 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
@@ -314,7 +314,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
@@ -477,7 +477,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
 async fn direct_near_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox_with_version("2.4.0").await?;
     let contract_wasm = crate::get_contract_wasm().await;
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
@@ -572,10 +572,10 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let token_wasm = crate::get_ft_contract_wasm().await;
-    let token = sandbox.dev_deploy(&token_wasm).await?;
+    let token = sandbox.dev_deploy(token_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account
@@ -655,7 +655,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -665,7 +665,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": producer_account.id(),
         }))
@@ -675,7 +675,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -685,7 +685,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "mint")
+        .call(token.id(), "mint")
         .args_json(json!({
             "account_id": consumer_account.id(),
             "amount": "1000000000000000000000000000",
@@ -788,7 +788,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
         producer_new_balance
             .checked_sub(producer_initial_balance)
             .unwrap(),
-        (10u128.pow(24) / 10).into()
+        (10u128.pow(24) / 10)
     );
 
     Ok(())
@@ -799,10 +799,10 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let token_wasm = crate::get_ft_contract_wasm().await;
-    let token = sandbox.dev_deploy(&token_wasm).await?;
+    let token = sandbox.dev_deploy(token_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account
@@ -848,7 +848,7 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": consumer_account.id(),
         }))
@@ -858,7 +858,7 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": producer_account.id(),
         }))
@@ -868,7 +868,7 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "storage_deposit")
+        .call(token.id(), "storage_deposit")
         .args_json(json!({
             "account_id": contract.id(),
         }))
@@ -878,7 +878,7 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     assert!(outcome.is_success());
 
     let outcome = consumer_account
-        .call(&token.id(), "mint")
+        .call(token.id(), "mint")
         .args_json(json!({
             "account_id": consumer_account.id(),
             "amount": "1000000000000000000000000000",

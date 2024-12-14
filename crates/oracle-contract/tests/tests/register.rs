@@ -6,7 +6,7 @@ async fn register_consumer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
 
@@ -43,7 +43,7 @@ async fn register_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
     let contract_wasm = crate::get_contract_wasm().await;
 
-    let contract = sandbox.dev_deploy(&contract_wasm).await?;
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
 
