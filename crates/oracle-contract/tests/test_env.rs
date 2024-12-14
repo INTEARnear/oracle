@@ -1,14 +1,27 @@
 mod tests;
 
-use std::sync::LazyLock;
+use tokio::sync::OnceCell;
 
-use near_workspaces::cargo_near_build;
+static CONTRACT_WASM: OnceCell<Vec<u8>> = OnceCell::const_new();
 
-pub static CONTRACT_WASM: LazyLock<Vec<u8>> = LazyLock::new(|| {
-    let artifact =
-        cargo_near_build::build(Default::default()).expect("building `oracle` contract for tests");
-    let contract_wasm = std::fs::read(&artifact.path)
-        .map_err(|err| format!("accessing {} to read wasm contents: {}", artifact.path, err))
-        .expect("std::fs::read");
-    contract_wasm
-});
+pub async fn get_contract_wasm() -> &'static Vec<u8> {
+    CONTRACT_WASM
+        .get_or_init(|| async {
+            near_workspaces::compile_project("./")
+                .await
+                .expect("compiling `intear-oracle` contract for tests")
+        })
+        .await
+}
+
+static FT_CONTRACT_WASM: OnceCell<Vec<u8>> = OnceCell::const_new();
+
+pub async fn get_ft_contract_wasm() -> &'static Vec<u8> {
+    FT_CONTRACT_WASM
+        .get_or_init(|| async {
+            near_workspaces::compile_project("../test-ft-contract")
+                .await
+                .expect("compiling `test-ft-contract` contract for tests")
+        })
+        .await
+}

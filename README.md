@@ -37,11 +37,10 @@ Some data producers may choose to charge a fee for requesting some data using th
 
 `set_fee(fee: ProducerFee)`, ProducerFee is defined in [crates/oracle-contract/src/producer.rs](crates/oracle-contract/src/producer.rs).
 
-The oracle contract uses prepaid balance to optimize the amount of receipts generated, reducing the latency, but may allow per-request pricing in
-the future, if someone wants this feature added. To top up your balance, use these methods:
+The oracle contract uses prepaid balance to optimize the amount of receipts generated, reducing the latency, and allows per-request pricing. To top up your balance, use these methods:
 
 `deposit_near(account_id: Option<AccountId> default predecessor, producer_id: Option<AccountId> default all)`
-`ft_transfer_call` on the token with msg `account_id: Option<AccountId> default predecessor, producer_id: Option<AccountId> default all`
+`ft_transfer_call` on the token with msg `account_id: Option<AccountId> default sender, producer_id: Option<AccountId> default all`
 
 Parameters:
 - `account_id`: Account to top up. If not specified, defaults to the predecessor account, but you can top up someone else's balance in the contract

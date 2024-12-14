@@ -1,0 +1,18 @@
+[package]
+name = "test-ft-contract"
+description = "cargo-near-new-project-description"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.near.reproducible_build]
+image = "sourcescan/cargo-near:0.12.1-rust-1.82.0"
+image_digest = "sha256:841e72af53e151e3d8f65ef2e50dcec162699d876348a8ec0e77b6cdede667d9"
+passed_env = []
+container_build_command = ["cargo", "near", "build"]
+
+[dependencies]
+near-sdk = "5.5"
+near-sdk-contract-tools = "3.0.2"

@@ -4,6 +4,7 @@ members = [
     "crates/crosschain-indexer-centralized",
     "crates/oracle-contract",
     "crates/reclaim-gpt-contract",
+    "crates/test-ft-contract",
 ]
 resolver = "2"
 
