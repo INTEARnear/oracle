@@ -4,7 +4,7 @@ use serde_json::json;
 #[tokio::test]
 async fn register_consumer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = &crate::CONTRACT_WASM;
+    let contract_wasm = crate::get_contract_wasm().await;
 
     let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
@@ -41,7 +41,7 @@ async fn register_consumer() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn register_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = &crate::CONTRACT_WASM;
+    let contract_wasm = crate::get_contract_wasm().await;
 
     let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
