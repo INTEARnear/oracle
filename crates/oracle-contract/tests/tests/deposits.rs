@@ -4,9 +4,9 @@ use serde_json::json;
 #[tokio::test]
 async fn near_deposits() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = &crate::CONTRACT_WASM;
 
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
     let initial_balance = consumer_account.view_account().await?.balance;
@@ -138,9 +138,9 @@ async fn near_deposits() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn near_deposit_for_producer() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = &crate::CONTRACT_WASM;
 
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let consumer_account = sandbox.dev_create_account().await?;
     let producer_account = sandbox.dev_create_account().await?;

@@ -6,9 +6,9 @@ use serde_json::json;
 #[tokio::test]
 async fn no_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = &crate::CONTRACT_WASM;
 
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
 
@@ -150,9 +150,9 @@ async fn no_fee() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = &crate::CONTRACT_WASM;
 
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
@@ -312,9 +312,9 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox().await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
+    let contract_wasm = &crate::CONTRACT_WASM;
 
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
@@ -428,6 +428,8 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     assert!(outcome.is_success());
 
+    sandbox.fast_forward(1).await?;
+
     let outcome = producer_account
         .view(contract.id(), "get_deposit_near")
         .args_json(json!({
@@ -436,7 +438,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     assert_eq!(
         outcome.json::<NearToken>().unwrap(),
-        NearToken::from_millinear(1000 - 100) // 0.9 NEAR
+        NearToken::from_millinear(1000 - 100 + 50) // 0.95 NEAR
     );
 
     let response_is_correct = request
@@ -474,8 +476,8 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn direct_near_fee() -> Result<(), Box<dyn std::error::Error>> {
     let sandbox = near_workspaces::sandbox_with_version("2.4.0").await?;
-    let contract_wasm = include_bytes!("../../../target/near/intear_oracle/intear_oracle.wasm");
-    let contract = sandbox.dev_deploy(contract_wasm).await?;
+    let contract_wasm = &crate::CONTRACT_WASM;
+    let contract = sandbox.dev_deploy(&contract_wasm).await?;
 
     let producer_account = sandbox.dev_create_account().await?;
     let producer_initial_balance = producer_account.view_account().await?.balance;
