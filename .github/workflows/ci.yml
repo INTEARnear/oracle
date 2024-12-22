@@ -27,18 +27,15 @@ jobs:
           components: rustfmt, clippy
           
       - name: Install cargo-near
-        run: cargo install cargo-near
+        run: cargo install cargo-near@0.13.2
           
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        
       - name: Check formatting
         run: cargo fmt --all -- --check
         
       - name: Build NEAR contracts
         run: |
-          cd crates/oracle-contract && cargo near build --no-docker
-          cd ../reclaim-gpt-contract && cargo near build --no-docker
+          cd crates/oracle-contract && cargo near build non-reproducible-wasm
+          cd ../reclaim-gpt-contract && cargo near build non-reproducible-wasm
         
       - name: Check with clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
