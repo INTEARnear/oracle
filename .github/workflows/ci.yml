@@ -37,8 +37,8 @@ jobs:
         
       - name: Build NEAR contracts
         run: |
-          cd crates/oracle-contract && cargo near build --no-docker
-          cd ../reclaim-gpt-contract && cargo near build --no-docker
+          cd crates/oracle-contract && cargo near build
+          cd ../reclaim-gpt-contract && cargo near build
         
       - name: Check with clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
