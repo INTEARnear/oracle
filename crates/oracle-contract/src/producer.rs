@@ -1,5 +1,6 @@
 use near_sdk::serde::Serialize;
 use near_sdk::store::LookupMap;
+use near_sdk::NearSchema;
 use near_sdk::{
     env, ext_contract, json_types::U128, log, near, serde_json, AccountId, PromiseError,
 };
@@ -22,7 +23,7 @@ pub struct Response {
 
 /// A producer is an account that provides data to consumers.
 #[near(serializers=[borsh])]
-#[derive(Serialize)]
+#[derive(Serialize, NearSchema)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Producer {
     /// Account ID of the producer.
@@ -33,7 +34,8 @@ pub struct Producer {
     /// within 200 blocks. 200 is a NEAR protocol-level parameter.
     pub requests_timed_out: u64,
     /// Requests that are currently being processed.
-    #[serde(skip_serializing)]
+    #[serde(skip)]
+    #[schemars(skip)]
     pub requests_pending: LookupMap<RequestId, PendingRequest>,
     /// Producers meant for public use may want to charge a fee.
     pub fee: ProducerFee,
