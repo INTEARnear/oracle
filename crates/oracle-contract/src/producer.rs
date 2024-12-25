@@ -36,6 +36,13 @@ pub struct Producer {
     /// If true, the contract will receive `on_request(request_id,
     /// request_data, prepaid_fee)` call
     pub send_callback: bool,
+    /// Name of the producer.
+    pub name: String,
+    /// Description of the producer.
+    pub description: String,
+    /// Example input that can be used in usage examples on the
+    /// oracle dashboard.
+    pub example_input: Option<String>,
 }
 
 #[ext_contract(ext_producer)]
@@ -46,7 +53,8 @@ pub trait ProducerContract {
 #[cfg(feature = "contract")]
 #[near]
 impl Oracle {
-    pub fn add_producer(&mut self, account_id: ProducerId) {
+    pub fn add_producer(&mut self) {
+        let account_id = env::predecessor_account_id();
         let producer = Producer {
             account_id: account_id.clone(),
             requests_succeded: 0,
@@ -56,8 +64,26 @@ impl Oracle {
             }),
             fee: ProducerFee::None,
             send_callback: false,
+            name: "Unnamed".to_string(),
+            description: "No description".to_string(),
+            example_input: None,
         };
         self.producers.insert(account_id, producer);
+    }
+
+    pub fn edit_producer_details(
+        &mut self,
+        name: String,
+        description: String,
+        example_input: Option<String>,
+    ) {
+        let producer = self
+            .producers
+            .get_mut(&env::predecessor_account_id())
+            .expect("Producer doesn't exist");
+        producer.name = name;
+        producer.description = description;
+        producer.example_input = example_input;
     }
 
     pub fn is_producer(&self, account_id: ProducerId) -> bool {
