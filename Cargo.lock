@@ -1415,6 +1415,7 @@ dependencies = [
  "intear-oracle",
  "log",
  "near-api",
+ "near-primitives 0.27.0",
  "parking_lot",
  "serde",
  "serde_json",

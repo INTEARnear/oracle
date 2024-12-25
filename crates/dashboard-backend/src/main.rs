@@ -1,7 +1,10 @@
 use anyhow::Result;
 use futures::future::join_all;
-use log::{info, warn};
-use near_api::prelude::AccountId;
+use intear_oracle::fees::ProducerFee;
+use log::{error, info, warn};
+use near_api::prelude::{AccountId, Contract, Reference};
+use near_primitives::serialize::dec_format;
+use near_primitives::types::Balance;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
@@ -17,8 +20,9 @@ const UPDATE_INTERVAL: Duration = Duration::from_secs(10);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Fee {
-    amount: String,
-    token: String,
+    #[serde(with = "dec_format")]
+    amount: Balance,
+    token: AccountId,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,10 +36,75 @@ struct Oracle {
     example_input: Option<String>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct Producer {
+    pub account_id: AccountId,
+    pub requests_succeded: u64,
+    pub requests_timed_out: u64,
+    pub fee: ProducerFee,
+    pub send_callback: bool,
+    pub name: String,
+    pub description: String,
+    pub example_input: Option<String>,
+}
+
 type Oracles = Arc<RwLock<Vec<Oracle>>>;
 
-async fn get_oracle_info(_oracle_id: &AccountId) -> Oracle {
-    todo!()
+async fn get_oracle_info(oracle_id: &AccountId) -> Oracle {
+    match Contract(ORACLE_CONTRACT_ID.parse().unwrap())
+        .call_function(
+            "get_producer_details",
+            serde_json::json!({
+                "account_id": oracle_id,
+            }),
+        )
+        .unwrap()
+        .read_only::<Producer>()
+        .at(Reference::Final)
+        .fetch_from_mainnet()
+        .await
+    {
+        Ok(data) => Oracle {
+            id: oracle_id.clone(),
+            name: data.data.name,
+            description: data.data.description,
+            successes: data.data.requests_succeded,
+            failures: data.data.requests_timed_out,
+            fee: match data.data.fee {
+                ProducerFee::None => Fee {
+                    amount: 0,
+                    token: "near".parse().unwrap(),
+                },
+                ProducerFee::Near { prepaid_amount } => Fee {
+                    amount: prepaid_amount.as_yoctonear(),
+                    token: "near".parse().unwrap(),
+                },
+                ProducerFee::FungibleToken {
+                    token,
+                    prepaid_amount,
+                } => Fee {
+                    amount: prepaid_amount.0,
+                    token,
+                },
+            },
+            example_input: data.data.example_input,
+        },
+        Err(err) => {
+            error!("{err:?}");
+            Oracle {
+                id: oracle_id.clone(),
+                name: "Error".to_string(),
+                description: "Error".to_string(),
+                successes: 0,
+                failures: 0,
+                fee: Fee {
+                    amount: 0,
+                    token: "near".parse().unwrap(),
+                },
+                example_input: None,
+            }
+        }
+    }
 }
 
 async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<AccountId>) {
