@@ -1,34 +1,34 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Progress,
-  Stack,
-  Badge,
-  Text,
-  useColorModeValue,
-  Heading,
-  Divider,
-  Box,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    Progress,
+    Stack,
+    Badge,
+    Text,
+    useColorModeValue,
+    Heading,
+    Divider,
+    Box,
 } from '@chakra-ui/react';
 import { Oracle } from '../data/mockOracles';
 import { CopyableCode } from './CopyableCode';
 
 interface OracleModalProps {
-  oracle: Oracle | null;
-  isOpen: boolean;
-  onClose: () => void;
+    oracle: Oracle | null;
+    isOpen: boolean;
+    onClose: () => void;
 }
 
 export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
-  const statBg = useColorModeValue('gray.100', 'gray.700');
+    const statBg = useColorModeValue('gray.100', 'gray.700');
 
-  if (!oracle) return null;
+    if (!oracle) return null;
 
-  const cliExample = `# Query the oracle
+    const cliExample = `# Query the oracle
 oracle-cli query ${oracle.name.toLowerCase().replace(/ /g, '-')} \\
   --params '{"pair": "BTC/USD"}' \\
   --fee ${oracle.fee.amount} \\
@@ -39,7 +39,7 @@ oracle-cli subscribe ${oracle.name.toLowerCase().replace(/ /g, '-')} \\
   --interval "1m" \\
   --callback "http://your-api.com/webhook"`;
 
-  const rustExample = `use oracle_sdk::prelude::*;
+    const rustExample = `use oracle_sdk::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -57,52 +57,54 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }`;
 
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
-      <ModalOverlay backdropFilter="blur(10px)" />
-      <ModalContent bg="gray.900">
-        <ModalHeader>{oracle.name}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={6}>
-          <Text mb={4}>{oracle.description}</Text>
-          <Progress
-            value={oracle.successRate}
-            colorScheme="green"
-            mb={4}
-            borderRadius="full"
-          />
-          <Stack spacing={4} mb={6}>
-            <Stack direction="row" spacing={2} flexWrap="wrap">
-              <Badge bg={statBg} px={3} py={1}>
-                Users: {oracle.users.toLocaleString()}
-              </Badge>
-              <Badge bg={statBg} px={3} py={1}>
-                Success Rate: {oracle.successRate}%
-              </Badge>
-              <Badge bg={statBg} px={3} py={1}>
-                Failure Rate: {oracle.failureRate}%
-              </Badge>
-              <Badge bg={statBg} px={3} py={1}>
-                Fee: {oracle.fee.amount} {oracle.fee.token}
-              </Badge>
-            </Stack>
-          </Stack>
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} size="xl">
+            <ModalOverlay backdropFilter="blur(10px)" />
+            <ModalContent bg="gray.900">
+                <ModalHeader>{oracle.name}</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody pb={6}>
+                    <Text mb={4}>{oracle.description}</Text>
+                    <Progress
+                        value={oracle.successes}
+                        min={0}
+                        max={oracle.successes + oracle.failures}
+                        colorScheme="green"
+                        mb={4}
+                        borderRadius="full"
+                    />
+                    <Stack spacing={4} mb={6}>
+                        <Stack direction="row" spacing={2} flexWrap="wrap">
+                            <Badge bg={statBg} px={3} py={1}>
+                                Used times: {oracle.successes + oracle.failures}
+                            </Badge>
+                            <Badge bg={statBg} px={3} py={1}>
+                                Success Rate: {oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100}%
+                            </Badge>
+                            <Badge bg={statBg} px={3} py={1}>
+                                Failure Rate: {oracle.failures / Math.max(1, oracle.successes + oracle.failures) * 100}%
+                            </Badge>
+                            <Badge bg={statBg} px={3} py={1}>
+                                Fee: {oracle.fee.amount} {oracle.fee.token}
+                            </Badge>
+                        </Stack>
+                    </Stack>
 
-          <Divider my={6} />
+                    <Divider my={6} />
 
-          <Stack spacing={6}>
-            <Box>
-              <Heading size="sm" mb={4}>CLI Usage Example</Heading>
-              <CopyableCode code={cliExample} language="shell" />
-            </Box>
+                    <Stack spacing={6}>
+                        <Box>
+                            <Heading size="sm" mb={4}>CLI Usage Example</Heading>
+                            <CopyableCode code={cliExample} language="shell" />
+                        </Box>
 
-            <Box>
-              <Heading size="sm" mb={4}>Rust Integration Example</Heading>
-              <CopyableCode code={rustExample} language="rust" />
-            </Box>
-          </Stack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
-  );
+                        <Box>
+                            <Heading size="sm" mb={4}>Rust Integration Example</Heading>
+                            <CopyableCode code={rustExample} language="rust" />
+                        </Box>
+                    </Stack>
+                </ModalBody>
+            </ModalContent>
+        </Modal>
+    );
 }; 
