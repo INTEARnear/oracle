@@ -14,9 +14,7 @@ async fn no_fee() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());
@@ -159,9 +157,7 @@ async fn near_fee() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());
@@ -321,9 +317,7 @@ async fn near_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());
@@ -484,9 +478,7 @@ async fn direct_near_fee() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());
@@ -590,9 +582,7 @@ async fn ft_fee() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());
@@ -817,9 +807,7 @@ async fn ft_fee_refund() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());

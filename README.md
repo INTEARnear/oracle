@@ -12,7 +12,7 @@ It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519) and [inin
 
 ### Setting up
 
-- To set up a producer that submits data on chain, use `add_producer(account_id: AccountId)` method, as well as `set_fee`.
+- To set up a producer that submits data on chain, use `add_producer()` method, as well as `set_fee`.
 - To set up a consumer that requests data from producers, use `register_consumer(account_id: AccountId)` method and deposit the fee, or supply it directly in each `request` method.
 
 Don't forget about storage deposits.
