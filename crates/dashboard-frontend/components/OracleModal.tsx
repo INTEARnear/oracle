@@ -80,10 +80,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 Used times: {oracle.successes + oracle.failures}
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
-                                Success Rate: {oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100}%
+                                Success Rate: {(oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}%
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
-                                Failure Rate: {oracle.failures / Math.max(1, oracle.successes + oracle.failures) * 100}%
+                                Failure Rate: {(oracle.failures / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}%
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
                                 Fee: {oracle.fee.amount} {oracle.fee.token}

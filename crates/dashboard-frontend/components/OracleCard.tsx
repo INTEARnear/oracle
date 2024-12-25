@@ -42,10 +42,10 @@ export const OracleCard = ({ oracle, onClick }: OracleCardProps) => {
             />
             <Stack direction="row" spacing={2} flexWrap="wrap">
                 <Badge bg={statBg} px={3} py={1}>
-                    👥 {oracle.successes + oracle.failures} times used
+                    👥 Used {oracle.successes + oracle.failures} times
                 </Badge>
                 <Badge bg={statBg} px={3} py={1}>
-                    ✅ {oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100}% uptime
+                    ✅ {(oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}% uptime
                 </Badge>
                 <Badge bg={statBg} px={3} py={1}>
                     💰 {oracle.fee.amount} {oracle.fee.token}
