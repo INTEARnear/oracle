@@ -1,5 +1,5 @@
 export interface Oracle {
-    id: number;
+    id: string;
     name: string;
     description: string;
     successes: number;
@@ -13,7 +13,7 @@ export interface Oracle {
 
 export const mockOracles: Oracle[] = [
     {
-        id: 1,
+        id: "chainlink-price-feed.near",
         name: "ChainLink Price Feed",
         description: "Real-time cryptocurrency price data aggregated from multiple sources",
         successes: 1200,
@@ -25,7 +25,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "token.0xshitzu.near",
     },
     {
-        id: 2,
+        id: "weather-oracle.near",
         name: "Weather Oracle",
         description: "Global weather data from multiple meteorological stations",
         successes: 50000,
@@ -36,7 +36,7 @@ export const mockOracles: Oracle[] = [
         },
     },
     {
-        id: 3,
+        id: "stock-market-feed.near",
         name: "Stock Market Data Feed",
         description: "Real-time stock market data from major global exchanges",
         successes: 890000,
@@ -48,7 +48,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "AAPL",
     },
     {
-        id: 4,
+        id: "sports-results.near",
         name: "Sports Results Oracle",
         description: "Live sports scores and match results from major leagues worldwide",
         successes: 25000,
@@ -60,7 +60,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "NBA_GAME_20230615_GSW_LAL",
     },
     {
-        id: 5,
+        id: "flight-status.near",
         name: "Flight Status Tracker",
         description: "Real-time flight status and delay information from global airports",
         successes: 150000,
@@ -72,7 +72,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "AA1234",
     },
     {
-        id: 6,
+        id: "random-number.near",
         name: "Random Number Generator",
         description: "Verifiable random number generation for gaming and lottery applications",
         successes: 1000000,
@@ -84,7 +84,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "range:1-1000",
     },
     {
-        id: 7,
+        id: "identity-verify.near",
         name: "Identity Verification",
         description: "KYC and identity verification service integration",
         successes: 75000,
@@ -96,7 +96,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "user_id:12345",
     },
     {
-        id: 8,
+        id: "carbon-credits.near",
         name: "Carbon Credit Tracker",
         description: "Real-time carbon credit pricing and verification",
         successes: 45000,
@@ -108,7 +108,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "credit_id:VCS-123",
     },
     {
-        id: 9,
+        id: "iot-sensors.near",
         name: "IoT Sensor Network",
         description: "Distributed IoT sensor data aggregation and verification",
         successes: 500000,
@@ -120,7 +120,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "sensor_id:456",
     },
     {
-        id: 10,
+        id: "dns-validator.near",
         name: "DNS Record Validator",
         description: "Domain name system record verification and resolution",
         successes: 250000,
@@ -132,7 +132,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "example.com",
     },
     {
-        id: 11,
+        id: "social-metrics.near",
         name: "Social Media Metrics",
         description: "Real-time social media engagement and follower metrics",
         successes: 180000,
@@ -144,7 +144,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "@username",
     },
     {
-        id: 12,
+        id: "nft-floor-price.near",
         name: "NFT Floor Price",
         description: "Real-time NFT collection floor prices across major marketplaces",
         successes: 350000,
@@ -156,7 +156,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "collection:boredapes",
     },
     {
-        id: 13,
+        id: "earthquake-monitor.near",
         name: "Earthquake Monitor",
         description: "Global seismic activity monitoring and reporting",
         successes: 15000,
@@ -168,7 +168,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "region:pacific-rim",
     },
     {
-        id: 14,
+        id: "election-results.near",
         name: "Election Results",
         description: "Official election results verification and reporting",
         successes: 5000,
@@ -180,7 +180,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "election_id:2024_us",
     },
     {
-        id: 15,
+        id: "asset-insurance.near",
         name: "Asset Insurance Oracle",
         description: "Real-time insurance premium calculations and risk assessment",
         successes: 120000,
@@ -192,7 +192,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "asset_id:vehicle_123",
     },
     {
-        id: 16,
+        id: "defi-rates.near",
         name: "DeFi Interest Rates",
         description: "Aggregated interest rates from major DeFi protocols",
         successes: 450000,
@@ -204,7 +204,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "protocol:aave",
     },
     {
-        id: 17,
+        id: "real-estate.near",
         name: "Real Estate Valuation",
         description: "Property valuation data from multiple real estate sources",
         successes: 75000,
@@ -216,7 +216,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "property_id:ny_123",
     },
     {
-        id: 18,
+        id: "air-quality.near",
         name: "Air Quality Index",
         description: "Real-time air quality measurements from global monitoring stations",
         successes: 280000,
@@ -228,7 +228,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "city:shanghai",
     },
     {
-        id: 19,
+        id: "commodity-prices.near",
         name: "Commodity Prices",
         description: "Real-time commodity price data from global markets",
         successes: 620000,
@@ -240,7 +240,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "gold_spot",
     },
     {
-        id: 20,
+        id: "domain-reputation.near",
         name: "Domain Reputation",
         description: "Website safety and reputation scoring system",
         successes: 890000,
@@ -252,7 +252,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "website.com",
     },
     {
-        id: 21,
+        id: "traffic-data.near",
         name: "Traffic Data Feed",
         description: "Real-time traffic conditions and congestion data",
         successes: 420000,
@@ -264,7 +264,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "highway_id:101",
     },
     {
-        id: 22,
+        id: "energy-grid.near",
         name: "Energy Grid Monitor",
         description: "Power grid status and energy consumption metrics",
         successes: 180000,
@@ -276,7 +276,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "grid_sector:ny_manhattan",
     },
     {
-        id: 23,
+        id: "health-insurance.near",
         name: "Health Insurance Claims",
         description: "Medical procedure pricing and insurance claim verification",
         successes: 95000,
@@ -288,7 +288,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "procedure_code:12345",
     },
     {
-        id: 24,
+        id: "agricultural-yield.near",
         name: "Agricultural Yield Data",
         description: "Crop yield and farming conditions monitoring",
         successes: 65000,
@@ -300,7 +300,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "farm_id:iowa_123",
     },
     {
-        id: 25,
+        id: "exchange-rates.near",
         name: "Exchange Rate Oracle",
         description: "Real-time currency exchange rates from major forex markets",
         successes: 780000,
@@ -312,7 +312,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "USD/EUR",
     },
     {
-        id: 26,
+        id: "smart-city.near",
         name: "Smart City Sensors",
         description: "Urban infrastructure monitoring and smart city metrics",
         successes: 320000,
@@ -324,7 +324,7 @@ export const mockOracles: Oracle[] = [
         exampleInput: "sensor_type:parking",
     },
     {
-        id: 27,
+        id: "supply-chain.near",
         name: "Supply Chain Tracker",
         description: "Global supply chain verification and tracking",
         successes: 250000,

@@ -13,6 +13,7 @@ import {
     Heading,
     Divider,
     Box,
+    Link,
 } from '@chakra-ui/react';
 import { Oracle } from '../data/mockOracles';
 import { CopyableCode } from './CopyableCode';
@@ -24,6 +25,8 @@ interface OracleModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
+
+const DEFAULT_EXAMPLE_INPUT = "<your input to the oracle>";
 
 export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
     const statBg = useColorModeValue('gray.100', 'gray.700');
@@ -39,35 +42,6 @@ export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
         const amount = Number(oracle.fee.amount) / Math.pow(10, tokenInfo.decimal);
         return `${amount.toFixed(2)} ${tokenInfo.symbol}`;
     };
-
-    const cliExample = `# Query the oracle
-oracle-cli query ${oracle.name.toLowerCase().replace(/ /g, '-')} \\
-  --params '{"pair": "BTC/USD"}' \\
-  --fee ${oracle.fee.amount} \\
-  --token ${oracle.fee.token}
-
-# Subscribe to updates
-oracle-cli subscribe ${oracle.name.toLowerCase().replace(/ /g, '-')} \\
-  --interval "1m" \\
-  --callback "http://your-api.com/webhook"`;
-
-    const rustExample = `use oracle_sdk::prelude::*;
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = OracleClient::new()
-        .with_endpoint("${oracle.name.toLowerCase().replace(/ /g, '-')}")
-        .with_token("${oracle.fee.token}")
-        .with_fee(${oracle.fee.amount});
-
-    // Query the oracle
-    let response = client.query(json!({
-        "pair": "BTC/USD"
-    })).await?;
-
-    println!("Price: {}", response.get("price").unwrap());
-    Ok(())
-}`;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -89,16 +63,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     <Stack spacing={4} mb={6}>
                         <Stack direction="row" spacing={2} flexWrap="wrap">
                             <Badge bg={statBg} px={3} py={1}>
-                                Used times: {oracle.successes + oracle.failures}
+                                Used: {oracle.successes + oracle.failures} times
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
                                 Success Rate: {(oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}%
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
-                                Failure Rate: {(oracle.failures / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}%
-                            </Badge>
-                            <Badge bg={statBg} px={3} py={1}>
-                                Fee: {formatFee()}
+                                Fee: Up to {formatFee()}
                             </Badge>
                         </Stack>
                     </Stack>
@@ -108,12 +79,64 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     <Stack spacing={6}>
                         <Box>
                             <Heading size="sm" mb={4}>CLI Usage Example</Heading>
-                            <CopyableCode code={cliExample} language="shell" />
+                            <CopyableCode code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
+                            <Text>Note: The oracle may refund a portion of the fee if it wants to (some are usage-based, not per-request flat fee). The fee is fully refunded if the oracle fails to respond.</Text>
                         </Box>
 
                         <Box>
                             <Heading size="sm" mb={4}>Rust Integration Example</Heading>
-                            <CopyableCode code={rustExample} language="rust" />
+                            <Text mb={4}>First, set up your Cargo.toml:</Text>
+                            <CopyableCode
+                                code={`[package]
+name = "example"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "5.5"
+intear-oracle = { git = "https://github.com/INTEARnear/oracle", default-features = false }`}
+                                language="toml"
+                            />
+                            <Text mt={4} mb={4}>Then implement the oracle consumer (src/lib.rs):</Text>
+                            <CopyableCode
+                                code={`use near_sdk::{env, near_bindgen, AccountId, Gas, Promise};
+use intear_oracle::consumer::ext_oracle_consumer;
+
+#[near_bindgen]
+impl Contract {
+    pub fn check_if_works(&self) -> Promise {
+        ext_oracle_consumer::ext("dev-unaudited-v0.oracle.intear.near".parse().unwrap())
+            .with_static_gas(Gas::from_tgas(10))
+            // Attach a NEAR fee here (if it's in NEAR). Alternatively, you can use a subscription
+            // model, deposit some NEAR or other fungible tokens, and just remove this comment.
+            .request(
+                "${oracle.id}".parse().unwrap(),
+                "${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}".to_string(),
+            )
+            .then(Self::ext(env::current_account_id()).on_response())
+    }
+
+    #[private] // the callback function must be private so that no one can just call it normally
+    pub fn on_response(&self, #[callback_unwrap] response: Option<Response>) {
+        let result = response.expect("Oracle didn't respond in time");
+        let response: String = result.response_data;
+        // Now you can do something with the response
+    }
+}`}
+                                language="rust"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Heading size="sm" mb={4}>Full Example</Heading>
+                            <Text>
+                                Check out the <Link href="https://github.com/INTEARnear/oracle/tree/7ddd6b9722e47481c463127d31282955e96ccbc3/crates/example-consumer" color="blue.400" isExternal>
+                                    full example on GitHub
+                                </Link>
+                            </Text>
                         </Box>
                     </Stack>
                 </ModalBody>
