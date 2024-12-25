@@ -261,32 +261,34 @@ impl Oracle {
             PrepaidFee::Near {
                 amount,
                 payment_type,
-            } => {
-                let consumer = self
-                    .consumers
-                    .get_mut(consumer_id)
-                    .expect("Consumer is not registered");
+            } => match payment_type {
+                NearPaymentType::ForSpecificProducer => {
+                    let consumer = self
+                        .consumers
+                        .get_mut(consumer_id)
+                        .expect("Consumer is not registered");
 
-                match payment_type {
-                    NearPaymentType::ForSpecificProducer => {
-                        if let Some(near_balance) =
-                            consumer.near_balance_producer.get_mut(producer_id)
-                        {
-                            *near_balance = near_balance.checked_add(*amount).unwrap();
-                        } else {
-                            consumer
-                                .near_balance_producer
-                                .insert(producer_id.clone(), *amount);
-                        }
-                    }
-                    NearPaymentType::ForAllProducers => {
-                        consumer.near_balance = consumer.near_balance.checked_add(*amount).unwrap();
-                    }
-                    NearPaymentType::AttachedToCall => {
-                        Promise::new(consumer_id.clone()).transfer(*amount);
+                    if let Some(near_balance) = consumer.near_balance_producer.get_mut(producer_id)
+                    {
+                        *near_balance = near_balance.checked_add(*amount).unwrap();
+                    } else {
+                        consumer
+                            .near_balance_producer
+                            .insert(producer_id.clone(), *amount);
                     }
                 }
-            }
+                NearPaymentType::ForAllProducers => {
+                    let consumer = self
+                        .consumers
+                        .get_mut(consumer_id)
+                        .expect("Consumer is not registered");
+
+                    consumer.near_balance = consumer.near_balance.checked_add(*amount).unwrap();
+                }
+                NearPaymentType::AttachedToCall => {
+                    Promise::new(consumer_id.clone()).transfer(*amount);
+                }
+            },
             PrepaidFee::FungibleToken {
                 token,
                 amount,

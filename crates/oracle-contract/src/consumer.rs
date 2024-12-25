@@ -1,5 +1,5 @@
 use near_sdk::{
-    env,
+    env, ext_contract,
     json_types::{U128, U64},
     near, serde_json,
     store::LookupMap,
@@ -91,9 +91,18 @@ impl Oracle {
     pub fn is_registered_as_consumer(&self, account_id: &ConsumerId) -> bool {
         self.consumers.contains_key(account_id)
     }
+}
 
+#[ext_contract(ext_oracle_consumer)]
+pub trait ConsumerExt {
+    fn request(&mut self, producer_id: ProducerId, request_data: String);
+}
+
+#[cfg(feature = "contract")]
+#[near]
+impl ConsumerExt for Oracle {
     #[payable]
-    pub fn request(&mut self, producer_id: ProducerId, request_data: String) {
+    fn request(&mut self, producer_id: ProducerId, request_data: String) {
         let consumer_id = env::predecessor_account_id();
         let producer = self
             .producers
