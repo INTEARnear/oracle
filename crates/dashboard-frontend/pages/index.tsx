@@ -12,15 +12,19 @@ import {
   InputLeftElement,
   Stack,
   Flex,
+  HStack,
 } from '@chakra-ui/react';
-import { SearchIcon } from '@chakra-ui/icons';
+import { SearchIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { OracleCard } from '../components/OracleCard';
 import { OracleModal } from '../components/OracleModal';
 import { CreateOracleModal } from '../components/CreateOracleModal';
 import { mockOracles, Oracle } from '../data/mockOracles';
 
+const ITEMS_PER_PAGE = 12;
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedOracle, setSelectedOracle] = useState<Oracle | null>(null);
   const {
     isOpen: isOracleModalOpen,
@@ -38,6 +42,15 @@ export default function Home() {
       oracle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       oracle.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredOracles.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedOracles = filteredOracles.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleOracleClick = (oracle: Oracle) => {
     setSelectedOracle(oracle);
@@ -79,7 +92,7 @@ export default function Home() {
             </Flex>
 
             <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-              {filteredOracles.map(oracle => (
+              {paginatedOracles.map(oracle => (
                 <OracleCard
                   key={oracle.id}
                   oracle={oracle}
@@ -87,6 +100,45 @@ export default function Home() {
                 />
               ))}
             </SimpleGrid>
+
+            {totalPages > 1 && (
+              <HStack justify="center" spacing={2}>
+                <Button
+                  leftIcon={<ChevronLeftIcon />}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  isDisabled={currentPage === 1}
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    variant={currentPage === page ? "solid" : "outline"}
+                    colorScheme={currentPage === page ? "purple" : "gray"}
+                  >
+                    {page}
+                  </Button>
+                ))}
+
+                <Button
+                  rightIcon={<ChevronRightIcon />}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  isDisabled={currentPage === totalPages}
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              </HStack>
+            )}
+
+            {filteredOracles.length === 0 && (
+              <Text textAlign="center" color="gray.500">
+                No oracles found matching your search criteria
+              </Text>
+            )}
           </Stack>
         </Container>
       </Box>
