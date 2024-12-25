@@ -50,9 +50,9 @@ export default function Home() {
       <Box as="header" py={8} borderBottom="1px solid" borderColor="gray.800">
         <Container maxW="container.xl">
           <Stack spacing={4} align="center">
-            <Heading color="purple.500" size="2xl">Intear Oracle</Heading>
+            <Heading color="blue.400" size="2xl">Intear Oracle</Heading>
             <Text color="gray.500" fontSize="lg" textAlign="center">
-              Decentralized data marketplace connecting data providers with consumers through secure and reliable oracles
+              Decentralized data marketplace connecting data providers with consumers through an oracle contract
             </Text>
           </Stack>
         </Container>
