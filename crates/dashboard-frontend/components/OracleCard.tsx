@@ -1,5 +1,5 @@
 import { Box, Text, Progress, Stack, Badge, useColorModeValue } from '@chakra-ui/react';
-import { Oracle } from '../data/mockOracles';
+import { Oracle } from '../api/oracles';
 import { useContext } from 'react';
 import { TokenPriceContext } from '../pages/_app';
 
