@@ -5,6 +5,7 @@ use near_sdk::{
     env, ext_contract, json_types::U128, log, near, serde_json, AccountId, PromiseError,
 };
 
+use crate::consumer::OracleEvent;
 use crate::{
     consumer::{ConsumerId, PendingRequest, RequestId},
     fees::{PrepaidFee, ProducerFee},
@@ -74,6 +75,18 @@ impl Oracle {
             description: "No description".to_string(),
             example_input: None,
         };
+        OracleEvent::ProducerCreated(Producer {
+            account_id: producer.account_id.clone(),
+            requests_succeded: producer.requests_succeded,
+            requests_timed_out: producer.requests_timed_out,
+            requests_pending: LookupMap::new(b"dontcare".as_slice()),
+            fee: producer.fee.clone(),
+            send_callback: producer.send_callback,
+            name: producer.name.clone(),
+            description: producer.description.clone(),
+            example_input: producer.example_input.clone(),
+        })
+        .emit();
         self.producers.insert(account_id, producer);
     }
 
@@ -96,6 +109,19 @@ impl Oracle {
         producer.name = name;
         producer.description = description;
         producer.example_input = example_input;
+
+        OracleEvent::ProducerUpdated(Producer {
+            account_id: producer.account_id.clone(),
+            requests_succeded: producer.requests_succeded,
+            requests_timed_out: producer.requests_timed_out,
+            requests_pending: LookupMap::new(b"dontcare".as_slice()),
+            fee: producer.fee.clone(),
+            send_callback: producer.send_callback,
+            name: producer.name.clone(),
+            description: producer.description.clone(),
+            example_input: producer.example_input.clone(),
+        })
+        .emit();
     }
 
     pub fn is_producer(&self, account_id: ProducerId) -> bool {
@@ -108,6 +134,19 @@ impl Oracle {
             .get_mut(&env::predecessor_account_id())
             .expect("Producer doesn't exist");
         producer.send_callback = send_callback;
+
+        OracleEvent::ProducerUpdated(Producer {
+            account_id: producer.account_id.clone(),
+            requests_succeded: producer.requests_succeded,
+            requests_timed_out: producer.requests_timed_out,
+            requests_pending: LookupMap::new(b"dontcare".as_slice()),
+            fee: producer.fee.clone(),
+            send_callback: producer.send_callback,
+            name: producer.name.clone(),
+            description: producer.description.clone(),
+            example_input: producer.example_input.clone(),
+        })
+        .emit();
     }
 
     #[private]
