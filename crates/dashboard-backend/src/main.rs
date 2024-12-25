@@ -48,12 +48,11 @@ async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<A
             oracle_ids.len()
         );
         let futures = oracle_ids.iter().map(get_oracle_info);
-        match join_all(futures).await {
-            updated_oracles => {
-                let mut oracle_list = oracles.write();
-                *oracle_list = updated_oracles;
-                info!("Successfully updated oracle information");
-            }
+        let updated_oracles = join_all(futures).await;
+        {
+            let mut oracle_list = oracles.write();
+            *oracle_list = updated_oracles;
+            info!("Successfully updated oracle information");
         }
     }
 }
