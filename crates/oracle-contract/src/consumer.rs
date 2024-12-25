@@ -8,7 +8,7 @@ use near_sdk::{
 
 use crate::{
     balance::FtId,
-    producer::{ext_producer, ProducerId},
+    producer::{ext_producer, Producer, ProducerId},
     StorageKey,
 };
 #[cfg(feature = "contract")]
@@ -56,6 +56,10 @@ pub struct Consumer {
 pub enum OracleEvent {
     #[event_version("1.0.0")]
     Request(RequestEventV1),
+    #[event_version("1.0.0")]
+    ProducerCreated(Producer),
+    #[event_version("1.0.0")]
+    ProducerUpdated(Producer),
 }
 
 #[near(serializers=["json"])]

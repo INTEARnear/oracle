@@ -1,7 +1,11 @@
-use near_sdk::{env, json_types::U128, near, Gas, NearToken, Promise};
+use near_sdk::{env, json_types::U128, near, store::LookupMap, Gas, NearToken, Promise};
 use near_sdk_contract_tools::ft::ext_nep141;
 
-use crate::{balance::FtId, consumer::ConsumerId, producer::ProducerId};
+use crate::{
+    balance::FtId,
+    consumer::{ConsumerId, OracleEvent},
+    producer::{Producer, ProducerId},
+};
 #[cfg(feature = "contract")]
 use crate::{Oracle, OracleExt};
 
@@ -63,6 +67,19 @@ impl Oracle {
             .get_mut(&env::predecessor_account_id())
             .expect("Producer is not registered")
             .fee = fee;
+        let producer = self.producers.get(&env::predecessor_account_id()).unwrap();
+        OracleEvent::ProducerCreated(Producer {
+            account_id: producer.account_id.clone(),
+            requests_succeded: producer.requests_succeded,
+            requests_timed_out: producer.requests_timed_out,
+            requests_pending: LookupMap::new(b"dontcare".as_slice()),
+            fee: producer.fee.clone(),
+            send_callback: producer.send_callback,
+            name: producer.name.clone(),
+            description: producer.description.clone(),
+            example_input: producer.example_input.clone(),
+        })
+        .emit();
     }
 }
 
