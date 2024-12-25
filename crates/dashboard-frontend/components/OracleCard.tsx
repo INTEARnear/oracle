@@ -38,6 +38,7 @@ export const OracleCard = ({ oracle, onClick }: OracleCardProps) => {
                 colorScheme="green"
                 mb={4}
                 borderRadius="full"
+                bg="red.400"
             />
             <Stack direction="row" spacing={2} flexWrap="wrap">
                 <Badge bg={statBg} px={3} py={1}>
