@@ -2,13 +2,6 @@ import { Box, IconButton, useClipboard, Text } from '@chakra-ui/react';
 import { CopyIcon, CheckIcon } from '@chakra-ui/icons';
 import { Highlight, themes } from 'prism-react-renderer';
 
-const languageMap: { [key: string]: string } = {
-    shell: 'bash',
-    rust: 'rust',
-    json: 'json',
-    text: 'text',
-};
-
 interface CopyableCodeProps {
     code: string;
     language?: string;
@@ -16,7 +9,7 @@ interface CopyableCodeProps {
 
 export const CopyableCode = ({ code, language = 'text' }: CopyableCodeProps) => {
     const { hasCopied, onCopy } = useClipboard(code);
-    const prismLanguage = languageMap[language] || 'text';
+    const prismLanguage = language;
 
     return (
         <Box position="relative" mb={4}>
