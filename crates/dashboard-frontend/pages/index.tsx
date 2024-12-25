@@ -36,8 +36,7 @@ export default function Home() {
   const filteredOracles = mockOracles.filter(
     oracle =>
       oracle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      oracle.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      oracle.fee.token.toLowerCase().includes(searchTerm.toLowerCase())
+      oracle.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleOracleClick = (oracle: Oracle) => {
@@ -67,7 +66,7 @@ export default function Home() {
                   <SearchIcon color="gray.500" />
                 </InputLeftElement>
                 <Input
-                  placeholder="Search oracles by name, description or token..."
+                  placeholder="Search oracles ..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   size="lg"
