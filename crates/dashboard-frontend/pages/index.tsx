@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -18,7 +18,7 @@ import { SearchIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
 import { OracleCard } from '../components/OracleCard';
 import { OracleModal } from '../components/OracleModal';
 import { CreateOracleModal } from '../components/CreateOracleModal';
-import { mockOracles, Oracle } from '../data/mockOracles';
+import { Oracle, fetchOracles } from '../api/oracles';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -26,6 +26,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedOracle, setSelectedOracle] = useState<Oracle | null>(null);
+  const [oracles, setOracles] = useState<Oracle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const {
     isOpen: isOracleModalOpen,
     onOpen: onOracleModalOpen,
@@ -37,7 +39,21 @@ export default function Home() {
     onClose: onCreateModalClose,
   } = useDisclosure();
 
-  const filteredOracles = mockOracles.filter(
+  useEffect(() => {
+    const loadOracles = async () => {
+      setIsLoading(true);
+      const data = await fetchOracles();
+      setOracles(data);
+      setIsLoading(false);
+    };
+
+    loadOracles();
+    const interval = setInterval(loadOracles, 10000); // Refresh every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredOracles = oracles.filter(
     oracle =>
       oracle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       oracle.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -76,7 +92,7 @@ export default function Home() {
             <Flex gap={4}>
               <InputGroup flex={1}>
                 <InputLeftElement pointerEvents="none">
-                  <SearchIcon color="gray.500" />
+                  <SearchIcon color="gray.500" boxSize={5} mt={2} ml={2} />
                 </InputLeftElement>
                 <Input
                   placeholder="Search oracles ..."

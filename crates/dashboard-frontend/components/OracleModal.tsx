@@ -15,7 +15,7 @@ import {
     Box,
     Link,
 } from '@chakra-ui/react';
-import { Oracle } from '../data/mockOracles';
+import { Oracle } from '../api/oracles';
 import { CopyableCode } from './CopyableCode';
 import { useContext } from 'react';
 import { TokenPriceContext } from '../pages/_app';
