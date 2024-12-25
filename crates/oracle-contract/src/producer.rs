@@ -1,3 +1,4 @@
+use near_sdk::serde::Serialize;
 use near_sdk::store::LookupMap;
 use near_sdk::{
     env, ext_contract, json_types::U128, log, near, serde_json, AccountId, PromiseError,
@@ -21,6 +22,8 @@ pub struct Response {
 
 /// A producer is an account that provides data to consumers.
 #[near(serializers=[borsh])]
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Producer {
     /// Account ID of the producer.
     pub account_id: ProducerId,
@@ -30,6 +33,7 @@ pub struct Producer {
     /// within 200 blocks. 200 is a NEAR protocol-level parameter.
     pub requests_timed_out: u64,
     /// Requests that are currently being processed.
+    #[serde(skip_serializing)]
     pub requests_pending: LookupMap<RequestId, PendingRequest>,
     /// Producers meant for public use may want to charge a fee.
     pub fee: ProducerFee,
@@ -69,6 +73,12 @@ impl Oracle {
             example_input: None,
         };
         self.producers.insert(account_id, producer);
+    }
+
+    pub fn get_producer_details(&self, account_id: ProducerId) -> &Producer {
+        self.producers
+            .get(&account_id)
+            .expect("Producer doesn't exist")
     }
 
     pub fn edit_producer_details(
