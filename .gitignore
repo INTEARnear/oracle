@@ -4,3 +4,4 @@ node_modules
 last-processed-block.txt
 node_modules
 .next
+.env
