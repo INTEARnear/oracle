@@ -16,6 +16,8 @@ import {
 } from '@chakra-ui/react';
 import { Oracle } from '../data/mockOracles';
 import { CopyableCode } from './CopyableCode';
+import { useContext } from 'react';
+import { TokenPriceContext } from '../pages/_app';
 
 interface OracleModalProps {
     oracle: Oracle | null;
@@ -25,8 +27,18 @@ interface OracleModalProps {
 
 export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
     const statBg = useColorModeValue('gray.100', 'gray.700');
+    const tokenPrices = useContext(TokenPriceContext);
 
     if (!oracle) return null;
+
+    const formatFee = () => {
+        const tokenInfo = tokenPrices[oracle.fee.token];
+        if (!tokenInfo) {
+            return "";
+        }
+        const amount = Number(oracle.fee.amount) / Math.pow(10, tokenInfo.decimal);
+        return `${amount.toFixed(2)} ${tokenInfo.symbol}`;
+    };
 
     const cliExample = `# Query the oracle
 oracle-cli query ${oracle.name.toLowerCase().replace(/ /g, '-')} \\
@@ -86,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 Failure Rate: {(oracle.failures / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}%
                             </Badge>
                             <Badge bg={statBg} px={3} py={1}>
-                                Fee: {oracle.fee.amount} {oracle.fee.token}
+                                Fee: {formatFee()}
                             </Badge>
                         </Stack>
                     </Stack>

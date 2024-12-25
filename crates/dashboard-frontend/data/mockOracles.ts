@@ -19,7 +19,7 @@ export const mockOracles: Oracle[] = [
         successes: 1200,
         failures: 96,
         fee: {
-            amount: "100000",
+            amount: "1000000",
             token: "usdt.tether-token.near"
         },
         exampleInput: "token.0xshitzu.near",

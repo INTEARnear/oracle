@@ -1,5 +1,7 @@
 import { Box, Text, Progress, Stack, Badge, useColorModeValue } from '@chakra-ui/react';
 import { Oracle } from '../data/mockOracles';
+import { useContext } from 'react';
+import { TokenPriceContext } from '../pages/_app';
 
 interface OracleCardProps {
     oracle: Oracle;
@@ -9,6 +11,16 @@ interface OracleCardProps {
 export const OracleCard = ({ oracle, onClick }: OracleCardProps) => {
     const cardBg = useColorModeValue('white', 'gray.800');
     const statBg = useColorModeValue('gray.100', 'gray.700');
+    const tokenPrices = useContext(TokenPriceContext);
+
+    const formatFee = () => {
+        const tokenInfo = tokenPrices[oracle.fee.token];
+        if (!tokenInfo) {
+            return "";
+        }
+        const amount = Number(oracle.fee.amount) / Math.pow(10, tokenInfo.decimal);
+        return `${amount.toFixed(2)} ${tokenInfo.symbol}`;
+    };
 
     return (
         <Box
@@ -48,7 +60,7 @@ export const OracleCard = ({ oracle, onClick }: OracleCardProps) => {
                     ✅ {(oracle.successes / Math.max(1, oracle.successes + oracle.failures) * 100).toFixed(2)}% uptime
                 </Badge>
                 <Badge bg={statBg} px={3} py={1}>
-                    💰 {oracle.fee.amount} {oracle.fee.token}
+                    💰 {formatFee()}
                 </Badge>
             </Stack>
         </Box>
