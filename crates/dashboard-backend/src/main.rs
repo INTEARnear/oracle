@@ -1,6 +1,7 @@
 use anyhow::Result;
 use futures::future::join_all;
 use log::{info, warn};
+use near_api::prelude::AccountId;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
@@ -12,8 +13,6 @@ use tokio::time;
 use warp::Filter;
 
 const UPDATE_INTERVAL: Duration = Duration::from_secs(10);
-
-type AccountId = String;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Fee {
@@ -58,7 +57,7 @@ async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<A
 }
 
 fn initial_oracle_ids() -> Vec<AccountId> {
-    vec!["oracle1.near".to_string(), "oracle2.near".to_string()]
+    vec!["gpt4o.oracle.intear.near".parse().unwrap()]
 }
 
 #[tokio::main]
