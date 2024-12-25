@@ -12,9 +12,7 @@ async fn contract_is_operational() -> Result<(), Box<dyn std::error::Error>> {
 
     let outcome = producer_account
         .call(contract.id(), "add_producer")
-        .args_json(json!({
-            "account_id": producer_account.id(),
-        }))
+        .args_json(json!({}))
         .transact()
         .await?;
     assert!(outcome.is_success());

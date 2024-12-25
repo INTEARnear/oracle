@@ -12,6 +12,7 @@ use std::time::Duration;
 use tokio::time;
 use warp::Filter;
 
+const ORACLE_CONTRACT_ID: &str = "dev-unaudited-v1.oracle.intear.near";
 const UPDATE_INTERVAL: Duration = Duration::from_secs(10);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
