@@ -72,6 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         colorScheme="green"
                         mb={4}
                         borderRadius="full"
+                        bg="red.400"
                     />
                     <Stack spacing={4} mb={6}>
                         <Stack direction="row" spacing={2} flexWrap="wrap">
