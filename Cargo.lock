@@ -1777,6 +1777,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "example-consumer"
+version = "0.1.0"
+dependencies = [
+ "intear-oracle",
+ "near-sdk",
+ "near-workspaces 0.10.1",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "eyre"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"

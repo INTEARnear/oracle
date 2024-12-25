@@ -5,6 +5,7 @@ members = [
     "crates/oracle-contract",
     "crates/reclaim-gpt-contract",
     "crates/test-ft-contract",
+    "crates/example-consumer",
 ]
 resolver = "2"
 
