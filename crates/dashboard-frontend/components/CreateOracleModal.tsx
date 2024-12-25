@@ -26,65 +26,73 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                 <ModalHeader>Create Your Own Oracle</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                    <Text mb={4}>Follow these steps to register as a data provider in the marketplace:</Text>
+                    <Text mb={4}>Follow these steps to register as a data provider in the Intear oracle marketplace:</Text>
 
                     <VStack spacing={6} align="stretch">
                         <Box>
-                            <Heading size="sm" mb={2}>1. Install the Oracle CLI</Heading>
+                            <Heading size="sm" mb={2}>1. Install the NEAR CLI</Heading>
                             <CopyableCode
-                                code="npm install -g oracle-marketplace-cli"
-                                language="shell"
+                                code="cargo install near-cli-rs"
+                                language="bash"
                             />
                         </Box>
 
                         <Box>
-                            <Heading size="sm" mb={2}>2. Initialize Your Oracle Configuration</Heading>
+                            <Heading size="sm" mb={2}>2. Initialize Your Oracle</Heading>
                             <CopyableCode
-                                code="oracle-cli init"
-                                language="shell"
+                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near add_producer json-args '{}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                language="bash"
                             />
-                            <Text mt={2} fontSize="sm" color="gray.400">This will create a oracle-config.json file in your current directory.</Text>
+                            <Text mt={2} fontSize="sm" color="gray.400">This will register your account on chain as a data provider.</Text>
                         </Box>
 
                         <Box>
                             <Heading size="sm" mb={2}>3. Configure Your Oracle Details</Heading>
                             <CopyableCode
-                                code={`{
-  "name": "Your Oracle Name",
-  "description": "Description of your data service",
-  "endpoint": "https://api.youroracle.com/data",
+                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
+  "name": "Weather Data",
+  "description": "Real-time weather temperature data from multiple meteorological stations",
+  "example_input": "Ukraine, Lviv"
+}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                language="bash"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Heading size="sm" mb={2}>4. Set a Fee</Heading>
+                            <CopyableCode
+                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
   "fee": {
-    "amount": "0.1",
-    "token": "LINK"
-  },
-  "updateFrequency": "1m",
-  "responseFormat": "JSON"
-}`}
-                                language="json"
+    "Near": {
+      "prepaid_amount": "100000000000000000000000"
+    }
+  }
+}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                language="bash"
                             />
-                        </Box>
-
-                        <Box>
-                            <Heading size="sm" mb={2}>4. Deploy Your Oracle</Heading>
+                            Or use another fungible token:
                             <CopyableCode
-                                code="oracle-cli deploy --network mainnet"
-                                language="shell"
+                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
+  "fee": {
+    "FungibleToken": {
+      "token": "usdt.tether-token.near",
+      "prepaid_amount": "1000000"
+    }
+  }
+}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                language="bash"
                             />
                         </Box>
 
                         <Box>
-                            <Heading size="sm" mb={2}>5. Verify Your Oracle</Heading>
-                            <CopyableCode
-                                code="oracle-cli verify --oracle-id YOUR_ORACLE_ID"
-                                language="shell"
-                            />
+                            <Heading size="sm" mb={2}>5. Refresh the Dashboard to see the changes</Heading>
                         </Box>
 
                         <Box>
-                            <Text>Once verified, your oracle will appear in the marketplace within 5-10 minutes.</Text>
+                            <Text>Your oracle will appear in the marketplace within 5-10 seconds.</Text>
                             <Text mt={2}>
                                 For more detailed documentation and support, visit{' '}
-                                <Link href="https://docs.oraclemarketplace.com" color="purple.500">
+                                <Link href="https://docs.intear.tech/oracle" color="purple.500">
                                     our documentation
                                 </Link>
                                 .
