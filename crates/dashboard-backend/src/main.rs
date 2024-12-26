@@ -9,6 +9,8 @@ use near_primitives::serialize::dec_format;
 use near_primitives::types::Balance;
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::io::{self, Write};
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -19,6 +21,7 @@ use warp::Filter;
 
 const ORACLE_CONTRACT_ID: &str = "dev-unaudited-v1.oracle.intear.near";
 const UPDATE_INTERVAL: Duration = Duration::from_secs(60);
+const ORACLE_IDS_FILE: &str = "oracle_ids.txt";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Fee {
@@ -115,10 +118,36 @@ async fn get_oracle_info(oracle_id: &AccountId) -> Oracle {
     }
 }
 
-async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<AccountId>) {
+async fn load_oracle_ids() -> io::Result<Vec<AccountId>> {
+    match fs::read_to_string(ORACLE_IDS_FILE) {
+        Ok(contents) => Ok(contents
+            .lines()
+            .filter_map(|line| line.parse().ok())
+            .collect()),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(Vec::new()),
+        Err(e) => Err(e),
+    }
+}
+
+async fn save_oracle_ids(ids: &[AccountId]) -> io::Result<()> {
+    let mut file = fs::File::create(ORACLE_IDS_FILE)?;
+    for id in ids {
+        writeln!(file, "{}", id)?;
+    }
+    Ok(())
+}
+
+async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>) {
     let mut interval = time::interval(UPDATE_INTERVAL);
     loop {
-        interval.tick().await;
+        let oracle_ids = {
+            let oracle_list = oracles.read();
+            oracle_list.iter().map(|o| o.id.clone()).collect::<Vec<_>>()
+        };
+
+        if let Err(e) = save_oracle_ids(&oracle_ids).await {
+            error!("Failed to save oracle IDs: {}", e);
+        }
 
         info!(
             "Updating oracle information for {} oracles",
@@ -131,6 +160,8 @@ async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<A
             *oracle_list = updated_oracles;
             info!("Successfully updated oracle information");
         }
+
+        interval.tick().await;
     }
 }
 
@@ -166,10 +197,6 @@ async fn listen_to_oracle_updates(oracles: Arc<RwLock<Vec<Oracle>>>) {
         .await;
 }
 
-fn initial_oracle_ids() -> Vec<AccountId> {
-    vec!["gpt4o.oracle.intear.near".parse().unwrap()]
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize environment variables
@@ -189,16 +216,17 @@ async fn main() -> Result<()> {
     let tls_cert_path = std::env::var("TLS_CERT_PATH").ok();
     let tls_key_path = std::env::var("TLS_KEY_PATH").ok();
 
-    let oracle_ids = initial_oracle_ids();
-    info!("Initialized with {} oracle IDs", oracle_ids.len());
-
-    // Initialize with empty vec and update immediately
-    let oracles = Arc::new(RwLock::new(Vec::new()));
+    // Load saved oracle IDs and initialize with them
+    let saved_ids = load_oracle_ids().await.unwrap_or_else(|e| {
+        error!("Failed to load oracle IDs: {}", e);
+        Vec::new()
+    });
+    let initial_oracles = join_all(saved_ids.iter().map(get_oracle_info)).await;
+    let oracles = Arc::new(RwLock::new(initial_oracles));
 
     // Spawn the background tasks to update oracle stats
     let update_oracles = oracles.clone();
-    let update_oracle_ids = oracle_ids.clone();
-    tokio::spawn(async move { update_all_oracles(update_oracles, update_oracle_ids).await });
+    tokio::spawn(async move { update_all_oracles(update_oracles).await });
     let listen_oracles = oracles.clone();
     tokio::spawn(async move { listen_to_oracle_updates(listen_oracles).await });
 
