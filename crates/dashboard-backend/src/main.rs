@@ -3,6 +3,7 @@ use futures::future::join_all;
 use inevents_websocket_client::EventStreamClient;
 use intear_events::events::log::log_nep297::LogNep297Event;
 use intear_oracle::fees::ProducerFee;
+use json_filter::{Filter, Operator};
 use log::{error, info, warn};
 use near_api::prelude::{AccountId, Contract, Reference};
 use near_primitives::serialize::dec_format;
@@ -17,7 +18,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time;
-use warp::Filter;
+use warp::Filter as WarpFilter;
 
 const ORACLE_CONTRACT_ID: &str = "dev-unaudited-v1.oracle.intear.near";
 const UPDATE_INTERVAL: Duration = Duration::from_secs(60);
@@ -168,20 +169,44 @@ async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>) {
 async fn listen_to_oracle_updates(oracles: Arc<RwLock<Vec<Oracle>>>) {
     let client = EventStreamClient::default();
     client
-        .stream_events::<LogNep297Event, _, _>("log_nep297", move |event| {
-            let oracles = oracles.clone();
-            async move {
-                if event.account_id == ORACLE_CONTRACT_ID && event.event_standard == "intear-oracle"
-                {
-                    let producer: Producer = match &event.event_event[..] {
-                        "producer_created" => {
-                            serde_json::from_value(event.event_data.unwrap()).unwrap()
-                        }
-                        "producer_updated" => {
-                            serde_json::from_value(event.event_data.unwrap()).unwrap()
-                        }
-                        _ => return,
-                    };
+        .stream_events::<LogNep297Event, _, _>(
+            "log_nep297",
+            Some(Operator::And(vec![
+                Filter {
+                    path: "account_id".to_string(),
+                    operator: Operator::Equals(serde_json::Value::String(
+                        ORACLE_CONTRACT_ID.to_string(),
+                    )),
+                },
+                Filter {
+                    path: "event_standard".to_string(),
+                    operator: Operator::Equals(serde_json::Value::String(
+                        "intear-oracle".to_string(),
+                    )),
+                },
+                Filter {
+                    path: ".".to_string(),
+                    operator: Operator::Or(vec![
+                        Filter {
+                            path: "event_event".to_string(),
+                            operator: Operator::Equals(serde_json::Value::String(
+                                "producer_created".to_string(),
+                            )),
+                        },
+                        Filter {
+                            path: "event_event".to_string(),
+                            operator: Operator::Equals(serde_json::Value::String(
+                                "producer_updated".to_string(),
+                            )),
+                        },
+                    ]),
+                },
+            ])),
+            move |event| {
+                let oracles = oracles.clone();
+                async move {
+                    let producer =
+                        serde_json::from_value::<Producer>(event.event_data.unwrap()).unwrap();
                     info!("Producer created or updated: {:?}", producer);
                     let mut oracle_list = oracles.write();
                     if let Some(oracle) =
@@ -192,8 +217,8 @@ async fn listen_to_oracle_updates(oracles: Arc<RwLock<Vec<Oracle>>>) {
                         oracle_list.push(producer.into());
                     }
                 }
-            }
-        })
+            },
+        )
         .await;
 }
 

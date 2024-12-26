@@ -1799,6 +1799,7 @@ dependencies = [
  "inevents-websocket-client",
  "intear-events",
  "intear-oracle",
+ "json-filter",
  "log",
  "near-api",
  "near-primitives 0.27.0",
@@ -3323,11 +3324,12 @@ dependencies = [
 
 [[package]]
 name = "inevents-websocket-client"
-version = "0.1.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6aa150f7a6410b16fbba9212ba539001b7ca6f93d8ff911cc582414149a0b11"
+checksum = "040b56addf015c54478ab254a2355639f5e8f6372dfe6c2b23aad3ef94029dc3"
 dependencies = [
  "futures-util",
+ "json-filter",
  "log",
  "reqwest 0.11.27",
  "serde",
@@ -3565,6 +3567,17 @@ checksum = "6717b6b5b077764fb5966237269cb3c64edddde4b14ce42647430a78ced9e7b7"
 dependencies = [
  "once_cell",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "json-filter"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "beea240a5168cc8756e18a96fc2de3e09224ee65dc18074a01cdad3645011bd7"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -5768,7 +5781,7 @@ version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
 dependencies = [
- "proc-macro-crate 1.3.1",
+ "proc-macro-crate 3.2.0",
  "proc-macro2",
  "quote",
  "syn 2.0.90",
@@ -6448,7 +6461,7 @@ dependencies = [
  "once_cell",
  "socket2 0.5.8",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
