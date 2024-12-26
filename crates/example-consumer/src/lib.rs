@@ -33,7 +33,7 @@ impl Contract {
     #[private]
     pub fn on_response(&self, #[callback_unwrap] result: Option<Response>) -> bool {
         result
-            .expect("Response is None")
+            .expect("Oracle didn't submit a response in time")
             .response_data
             .to_lowercase()
             .contains("yes")
