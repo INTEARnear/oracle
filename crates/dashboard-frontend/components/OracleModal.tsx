@@ -79,7 +79,7 @@ export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
                     <Stack spacing={6}>
                         <Box>
                             <Heading size="sm" mb={4}>CLI Usage Example</Heading>
-                            <CopyableCode code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
+                            <CopyableCode code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.example_input ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
                             <Text>Note: The oracle may refund a portion of the fee if it wants to (some are usage-based, not per-request flat fee). The fee is fully refunded if the oracle fails to respond.</Text>
                         </Box>
 
@@ -114,7 +114,7 @@ impl Contract {
             // model, deposit some NEAR or other fungible tokens, and just remove this comment.
             .request(
                 "${oracle.id}".parse().unwrap(),
-                "${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}".to_string(),
+                "${(oracle.example_input ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}".to_string(),
             )
             .then(Self::ext(env::current_account_id()).on_response())
     }
