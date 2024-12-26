@@ -86,7 +86,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                         </Box>
 
                         <Box>
-                            <Heading size="sm" mb={2}>5. Refresh the Dashboard to see the changes</Heading>
+                            <Heading size="sm" mb={2}>5. Go back to this page to see the changes</Heading>
                         </Box>
 
                         <Box>
