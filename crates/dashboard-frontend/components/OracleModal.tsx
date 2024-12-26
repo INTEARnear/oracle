@@ -15,7 +15,7 @@ import {
     Box,
     Link,
 } from '@chakra-ui/react';
-import { Oracle } from '../api/oracles';
+import { Oracle, ORACLE_CONTRACT_ID } from '../api/oracles';
 import { CopyableCode } from './CopyableCode';
 import { useContext } from 'react';
 import { TokenPriceContext } from '../pages/_app';
@@ -79,7 +79,7 @@ export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
                     <Stack spacing={6}>
                         <Box>
                             <Heading size="sm" mb={4}>CLI Usage Example</Heading>
-                            <CopyableCode code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
+                            <CopyableCode code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.exampleInput ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
                             <Text>Note: The oracle may refund a portion of the fee if it wants to (some are usage-based, not per-request flat fee). The fee is fully refunded if the oracle fails to respond.</Text>
                         </Box>
 
@@ -108,7 +108,7 @@ use intear_oracle::consumer::ext_oracle_consumer;
 #[near_bindgen]
 impl Contract {
     pub fn check_if_works(&self) -> Promise {
-        ext_oracle_consumer::ext("dev-unaudited-v0.oracle.intear.near".parse().unwrap())
+        ext_oracle_consumer::ext("${ORACLE_CONTRACT_ID}".parse().unwrap())
             .with_static_gas(Gas::from_tgas(10))
             // Attach a NEAR fee here (if it's in NEAR). Alternatively, you can use a subscription
             // model, deposit some NEAR or other fungible tokens, and just remove this comment.

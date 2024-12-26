@@ -6,7 +6,7 @@ Environment variables:
 - ACCOUNT_ID (your-account.near)
 - PRIVATE_KEY (ed25519:your-account)
 - CONTRACT_ID (gpt-reclaim.oracle.intear.near)
-- ORACLE_CONTRACT_ID (dev-unaudited-v0.oracle.intear.near)
+- ORACLE_CONTRACT_ID (dev-unaudited-v1.oracle.intear.near)
 - APP_ID (Reclaim app id)
 - APP_SECRET (Reclaim app secret)
 - OPENAI_API_KEY (sk-your-api-key)

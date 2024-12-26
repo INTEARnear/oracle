@@ -18,7 +18,7 @@ use near_token::NearToken;
 use reqwest::Url;
 use serde::{Deserialize, Serialize};
 
-const ORACLE_CONTRACT: &str = "dev-unaudited-v0.oracle.intear.near";
+const ORACLE_CONTRACT: &str = "dev-unaudited-v1.oracle.intear.near";
 
 #[derive(Debug, Deserialize)]
 struct OracleRequestEvent {
