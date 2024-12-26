@@ -10,7 +10,7 @@ export interface Oracle {
         amount: string;
         token: string;
     };
-    exampleInput?: string;
+    example_input?: string;
 }
 
 export async function fetchOracles(): Promise<Oracle[]> {
