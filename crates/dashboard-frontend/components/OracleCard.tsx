@@ -19,7 +19,7 @@ export const OracleCard = ({ oracle, onClick }: OracleCardProps) => {
             return "";
         }
         const amount = Number(oracle.fee.amount) / Math.pow(10, tokenInfo.decimal);
-        return `${amount.toFixed(2)} ${tokenInfo.symbol}`;
+        return `${Number(amount.toPrecision(2))} ${tokenInfo.symbol}`;
     };
 
     return (
