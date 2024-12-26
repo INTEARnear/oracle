@@ -5,3 +5,4 @@ last-processed-block.txt
 node_modules
 .next
 .env
+oracle_ids.txt
