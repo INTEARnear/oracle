@@ -78,13 +78,45 @@ export const OracleModal = ({ oracle, isOpen, onClose }: OracleModalProps) => {
 
                     <Stack spacing={6}>
                         <Box>
-                            <Heading size="sm" mb={4}>CLI Usage Example</Heading>
-                            <CopyableCode code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.example_input ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
-                            <Text>Note: The oracle may refund a portion of the fee if it wants to (some are usage-based, not per-request flat fee). The fee is fully refunded if the oracle fails to respond.</Text>
+                            <Heading size="md" mb={4}>CLI Usage Example</Heading>
+                            <Box>
+                                <Heading size="sm" mb={2}>1. Install the NEAR CLI</Heading>
+                                <CopyableCode
+                                    code="cargo install near-cli-rs"
+                                    language="bash"
+                                />
+                            </Box>
+
+                            <Box>
+                                <Heading size="sm" mb={2}>2. Register your account as a consumer in order to have a balance</Heading>
+                                <CopyableCode
+                                    code={`near contract call-function as-transaction dev-unaudited-v1.oracle.intear.near register_consumer json-args '{"account_id": "<YOUR_ACCOUNT_ID>"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                    language="bash"
+                                />
+                            </Box>
+
+                            <Box>
+                                <Heading size="sm" mb={2}>{`3. Deposit some ${oracle.fee.token === 'near' ? 'NEAR' : tokenPrices[oracle.fee.token]?.symbol ?? 'tokens'} to your account for fees`}</Heading>
+                                <CopyableCode
+                                    code={oracle.fee.token === "near"
+                                        ? `near contract call-function as-transaction dev-unaudited-v1.oracle.intear.near deposit_near json-args {} prepaid-gas '100.0 Tgas' attached-deposit '0.1 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`
+                                        : `near contract call-function as-transaction <TOKEN_CONTRACT_ID> ft_transfer_call json-args '{"receiver_id":"dev-unaudited-v1.oracle.intear.near","amount":"69000000000","msg":"{}"}' prepaid-gas '100.0 Tgas' attached-deposit '1 yoctoNEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`
+                                    }
+                                    language="bash"
+                                />
+                            </Box>
+
+                            <Box>
+                                <Heading size="sm" mb={2}>4. Request Data from the Oracle</Heading>
+                                <CopyableCode code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} request json-args '{"producer_id":"${oracle.id}","request_data":"${(oracle.example_input ?? DEFAULT_EXAMPLE_INPUT).replace(/"/g, '\\"')}"}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`} language="shell" />
+                                <Text><i>Note: The oracle may refund a portion of the fee if it wants to (some are usage-based, not per-request flat fee). The fee is fully refunded if the oracle fails to respond.</i></Text>
+                                <br />
+                                <Text><i>Note 2: You may get "408 Request Timeout" error in CLI, but after a few seconds, check Nearblocks and you'll see that it succeeded.</i></Text>
+                            </Box>
                         </Box>
 
                         <Box>
-                            <Heading size="sm" mb={4}>Rust Integration Example</Heading>
+                            <Heading size="md" mb={4}>Rust Integration Example</Heading>
                             <Text mb={4}>First, set up your Cargo.toml:</Text>
                             <CopyableCode
                                 code={`[package]
