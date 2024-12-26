@@ -18,7 +18,7 @@ import { SearchIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
 import { OracleCard } from '../components/OracleCard';
 import { OracleModal } from '../components/OracleModal';
 import { CreateOracleModal } from '../components/CreateOracleModal';
-import { Oracle, fetchOracles } from '../api/oracles';
+import { Oracle, fetchOracles, listenForUpdates } from '../api/oracles';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -48,12 +48,35 @@ export default function Home() {
     };
 
     loadOracles();
-    const interval = setInterval(loadOracles, 10000); // Refresh every 10 seconds
+
+    // Set up real-time updates
+    listenForUpdates((updatedOracle) => {
+      setOracles(prevOracles => {
+        const index = prevOracles.findIndex(o => o.id === updatedOracle.id);
+        if (index >= 0) {
+          // Update existing oracle
+          const newOracles = [...prevOracles];
+          newOracles[index] = updatedOracle;
+          return newOracles;
+        } else {
+          // Add new oracle
+          return [...prevOracles, updatedOracle];
+        }
+      });
+    }).then(() => {
+      // Handle any connection errors
+      console.error('WebSocket connection closed');
+    });
+
+    // Refresh as backup every 30 seconds
+    const interval = setInterval(loadOracles, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const filteredOracles = oracles.filter(
+  const filteredOracles = oracles
+    .sort((a, b) => b.successes - a.successes)
+    .filter(
     oracle =>
       oracle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       oracle.description.toLowerCase().includes(searchTerm.toLowerCase())

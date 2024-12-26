@@ -16,6 +16,7 @@
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@intear/inevents-websocket-client": "^1.0.1",
     "framer-motion": "^10.15.1",
     "next": "^13.4.13",
     "prism-react-renderer": "^2.4.1",
