@@ -22,8 +22,7 @@ impl Contract {
     }
 
     pub fn test_statement(&self, statement: String) -> Promise {
-        // let prompt = format!("Your job is to determine if the following statement is true:\n\n```\n{statement}\n```\n\nRespond with only \"Yes\" or \"No\"");
-        let prompt = statement;
+        let prompt = format!("Your job is to determine if the following statement is true:\n\n```\n{statement}\n```\n\nRespond with only \"Yes\" or \"No\"");
         ext_oracle_consumer::ext(self.oracle_contract.clone())
             .with_static_gas(Gas::from_tgas(10))
             .with_attached_deposit(NearToken::from_millinear(10)) // attach 0.01N fee
