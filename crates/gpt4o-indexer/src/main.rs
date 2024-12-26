@@ -5,7 +5,7 @@ use inevents_websocket_client::EventStreamClient;
 use intear_events::events::log::log_nep297::LogNep297Event;
 use json_filter::{Filter, Operator};
 use log::{error, info};
-use near_api::prelude::{Account, Contract};
+use near_api::prelude::{Account, Contract, NetworkConfig};
 use near_api::signer::secret_key::SecretKeySigner;
 use near_api::signer::Signer;
 use near_gas::NearGas;
@@ -98,7 +98,10 @@ impl GptOracle {
             .deposit(NearToken::from_yoctonear(0))
             .with_signer(self.account.0.clone(), self.signer.clone())
             .with_retries(5)
-            .send_to_mainnet()
+            .send_to(&NetworkConfig {
+                rpc_url: "https://rpc.shitzuapes.xyz".parse().unwrap(),
+                ..NetworkConfig::mainnet()
+            })
             .await?
             .transaction
             .hash;
