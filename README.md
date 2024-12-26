@@ -6,7 +6,7 @@ It utilizes [Yielded execution](https://github.com/near/NEPs/pull/519) and [inin
 
 > Try it out!
 
-`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near request json-args '{"producer_id":"gpt4o.oracle.intear.near","request_data":"Hello, GPT-4o!"}' prepaid-gas '100.0 Tgas' attached-deposit '0.01 NEAR' sign-as <account.near> network-config mainnet sign-with-keychain send`
+`near contract call-function as-transaction dev-unaudited-v1.oracle.intear.near request json-args '{"producer_id":"gpt4o.oracle.intear.near","request_data":"Hello, GPT-4o!"}' prepaid-gas '100.0 Tgas' attached-deposit '0.01 NEAR' sign-as <account.near> network-config mainnet sign-with-keychain send`
 
 ## Contract
 

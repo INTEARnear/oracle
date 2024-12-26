@@ -12,6 +12,7 @@ import {
     Link,
 } from '@chakra-ui/react';
 import { CopyableCode } from './CopyableCode';
+import { ORACLE_CONTRACT_ID } from '../api/oracles';
 
 interface CreateOracleModalProps {
     isOpen: boolean;
@@ -40,7 +41,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                         <Box>
                             <Heading size="sm" mb={2}>2. Initialize Your Oracle</Heading>
                             <CopyableCode
-                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near add_producer json-args '{}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
+                                code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} add_producer json-args '{}' prepaid-gas '100.0 Tgas' attached-deposit '0 NEAR' sign-as <YOUR_ACCOUNT_ID> network-config mainnet sign-with-keychain send`}
                                 language="bash"
                             />
                             <Text mt={2} fontSize="sm" color="gray.400">This will register your account on chain as a data provider.</Text>
@@ -49,7 +50,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                         <Box>
                             <Heading size="sm" mb={2}>3. Configure Your Oracle Details</Heading>
                             <CopyableCode
-                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
+                                code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} edit_producer_details json-args '{
   "name": "Weather Data",
   "description": "Real-time weather temperature data from multiple meteorological stations",
   "example_input": "Ukraine, Lviv"
@@ -61,7 +62,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                         <Box>
                             <Heading size="sm" mb={2}>4. Set a Fee</Heading>
                             <CopyableCode
-                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
+                                code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} edit_producer_details json-args '{
   "fee": {
     "Near": {
       "prepaid_amount": "100000000000000000000000"
@@ -72,7 +73,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                             />
                             Or use another fungible token:
                             <CopyableCode
-                                code={`near contract call-function as-transaction dev-unaudited-v0.oracle.intear.near edit_producer_details json-args '{
+                                code={`near contract call-function as-transaction ${ORACLE_CONTRACT_ID} edit_producer_details json-args '{
   "fee": {
     "FungibleToken": {
       "token": "usdt.tether-token.near",

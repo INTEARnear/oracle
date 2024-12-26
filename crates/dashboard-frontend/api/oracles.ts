@@ -1,3 +1,5 @@
+export const ORACLE_CONTRACT_ID = "dev-unaudited-v1.oracle.intear.near";
+
 export interface Oracle {
     id: string;
     name: string;
