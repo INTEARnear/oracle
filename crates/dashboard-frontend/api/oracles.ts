@@ -52,48 +52,78 @@ interface Producer {
     example_input?: string;
 }
 
-type ProducerFee = 
+type ProducerFee =
     | "None"
     | { Near: { prepaid_amount: string } }
     | { FungibleToken: { token: string, prepaid_amount: string } };
 
 export async function listenForUpdates(onOracleUpdate: (oracle: Oracle) => void) {
     const client = EventStreamClient.default();
-    await client.streamEvents<LogNep297Event<Producer>>("log_nep297", async (event) => {
-        if (event.account_id === ORACLE_CONTRACT_ID && event.event_standard === "intear-oracle") {
-            if (event.event_event === "producer_created" || event.event_event === "producer_updated") {
-                let producer: Producer = event.event_data;
-                let oracle: Oracle = {
-                    id: producer.account_id,
-                    name: producer.name,
-                    description: producer.description,
-                    successes: producer.requests_succeded,
-                    failures: producer.requests_timed_out,
-                    example_input: producer.example_input,
-                    fee: (() => {
-                        if (producer.fee === "None") {
-                            return {
-                                amount: "0",
-                                token: "near"
-                            };
-                        }
-                        if ('Near' in producer.fee) {
-                            return {
-                                amount: producer.fee.Near.prepaid_amount,
-                                token: "near"
-                            };
-                        }
-                        if ('FungibleToken' in producer.fee) {
-                            return {
-                                amount: producer.fee.FungibleToken.prepaid_amount,
-                                token: producer.fee.FungibleToken.token
-                            };
-                        }
-                        throw new Error('Unknown fee type');
-                    })()
+    await client.streamEvents<LogNep297Event<Producer>>("log_nep297", {
+        And: [
+            {
+                path: "account_id",
+                operator: {
+                    Equals: ORACLE_CONTRACT_ID
                 }
-                onOracleUpdate(oracle);
-            }
+            },
+            {
+                path: "event_standard",
+                operator: {
+                    Equals: "intear-oracle"
+                }
+            },
+            {
+                path: ".",
+                operator: {
+                    Or: [
+                        {
+                            path: "event_event",
+                            operator: {
+                                Equals: "producer_created"
+                            }
+                        },
+                        {
+                            path: "event_event",
+                            operator: {
+                                Equals: "producer_updated"
+                            }
+                        }
+                    ]
+                }
+            },
+        ]
+    }, async (event) => {
+        let producer: Producer = event.event_data;
+        let oracle: Oracle = {
+            id: producer.account_id,
+            name: producer.name,
+            description: producer.description,
+            successes: producer.requests_succeded,
+            failures: producer.requests_timed_out,
+            example_input: producer.example_input,
+            fee: (() => {
+                if (producer.fee === "None") {
+                    return {
+                        amount: "0",
+                        token: "near"
+                    };
+                }
+                if ('Near' in producer.fee) {
+                    return {
+                        amount: producer.fee.Near.prepaid_amount,
+                        token: "near"
+                    };
+                }
+                if ('FungibleToken' in producer.fee) {
+                    return {
+                        amount: producer.fee.FungibleToken.prepaid_amount,
+                        token: producer.fee.FungibleToken.token
+                    };
+                }
+                throw new Error('Unknown fee type');
+            })()
         }
+        onOracleUpdate(oracle);
     });
 }
