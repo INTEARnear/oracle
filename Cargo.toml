@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "crates/indexer",
-    "crates/crosschain-indexer-centralized",
     "crates/oracle-contract",
+    "crates/gpt4o-indexer",
+    "crates/crosschain-indexer-centralized",
     "crates/reclaim-gpt-contract",
     "crates/test-ft-contract",
     "crates/example-consumer",
