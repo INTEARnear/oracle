@@ -72,7 +72,7 @@ async fn example_consumer_is_operational() -> Result<(), Box<dyn std::error::Err
 
     let logs = request_result.logs();
     assert_eq!(logs, vec![
-        format!("EVENT_JSON:{{\"standard\":\"intear-oracle\",\"version\":\"1.0.0\",\"event\":\"request\",\"data\":{{\"producer_id\":\"{producer}\",\"consumer_id\":\"{consumer}\",\"request_id\":\"0\",\"request_data\":\"Is slime solid?\"}}}}",
+        format!("EVENT_JSON:{{\"standard\":\"intear-oracle\",\"version\":\"1.0.0\",\"event\":\"request\",\"data\":{{\"producer_id\":\"{producer}\",\"consumer_id\":\"{consumer}\",\"request_id\":\"0\",\"request_data\":\"Your job is to determine if the following statement is true:\\n\\n```\\nIs slime solid?\\n```\\n\\nRespond with only \\\"Yes\\\" or \\\"No\\\"\"}}}}",
             producer = producer_account.id(),
             consumer = example_consumer_contract.id()
         ),
