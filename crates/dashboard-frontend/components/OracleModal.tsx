@@ -165,7 +165,7 @@ impl Contract {
                         <Box>
                             <Heading size="sm" mb={4}>Full Example</Heading>
                             <Text>
-                                Check out the <Link href="https://github.com/INTEARnear/oracle/tree/7ddd6b9722e47481c463127d31282955e96ccbc3/crates/example-consumer" color="blue.400" isExternal>
+                                Check out the <Link href="https://github.com/INTEARnear/oracle/blob/main/crates/example-consumer" color="blue.400" isExternal>
                                     full example on GitHub
                                 </Link>
                             </Text>
