@@ -17,7 +17,7 @@ export interface Oracle {
 
 export async function fetchOracles(): Promise<Oracle[]> {
     try {
-        const response = await fetch('http://localhost:9000/oracles');
+        const response = await fetch('https://oracle-dashboard-api.intear.tech/oracles');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
