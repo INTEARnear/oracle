@@ -173,11 +173,26 @@ impl Oracle {
             if let Some(refund_amount) = response.refund_amount {
                 self.refund_partially(&consumer_id, &producer_id, &fee, refund_amount);
             }
-            self.deposit_to_producer(producer_id, &fee, response.refund_amount);
+            self.deposit_to_producer(producer_id.clone(), &fee, response.refund_amount);
         } else {
             producer.requests_timed_out += 1;
             self.refund_fully(&consumer_id, &producer_id, &fee);
         }
+
+        let producer = self.producers.get(&producer_id).unwrap();
+        OracleEvent::ProducerUpdated(Producer {
+            account_id: producer.account_id.clone(),
+            requests_succeded: producer.requests_succeded,
+            requests_timed_out: producer.requests_timed_out,
+            requests_pending: LookupMap::new(b"dontcare".as_slice()),
+            fee: producer.fee.clone(),
+            send_callback: producer.send_callback,
+            name: producer.name.clone(),
+            description: producer.description.clone(),
+            example_input: producer.example_input.clone(),
+        })
+        .emit();
+
         response.ok()
     }
 }
