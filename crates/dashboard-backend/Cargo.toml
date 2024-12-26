@@ -17,3 +17,5 @@ env_logger = "0.10"
 near-api = "0.3"
 intear-oracle = { path = "../oracle-contract", default-features = false }
 near-primitives = "0.27.0"
+inevents-websocket-client = "0.1.0"
+intear-events = { git = "https://github.com/INTEARnear/inevents" }
