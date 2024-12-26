@@ -62,6 +62,10 @@ async fn contract_is_operational() -> Result<(), Box<dyn std::error::Error>> {
         format!("Response from {producer} for 0: Ok(\"Hello Yielded Execution!\"), refund Ok(None)", 
             producer = producer_account.id()
         ),
+        format!(
+            "EVENT_JSON:{{\"standard\":\"intear-oracle\",\"version\":\"1.0.0\",\"event\":\"producer_updated\",\"data\":{{\"account_id\":\"{producer}\",\"requests_succeded\":1,\"requests_timed_out\":0,\"fee\":\"None\",\"send_callback\":false,\"name\":\"Unnamed\",\"description\":\"No description\",\"example_input\":null}}}}",
+            producer = producer_account.id()
+        ),
     ]);
 
     Ok(())
