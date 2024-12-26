@@ -1,5 +1,7 @@
 use anyhow::Result;
 use futures::future::join_all;
+use inevents_websocket_client::EventStreamClient;
+use intear_events::events::log::log_nep297::LogNep297Event;
 use intear_oracle::fees::ProducerFee;
 use log::{error, info, warn};
 use near_api::prelude::{AccountId, Contract, Reference};
@@ -16,7 +18,7 @@ use tokio::time;
 use warp::Filter;
 
 const ORACLE_CONTRACT_ID: &str = "dev-unaudited-v1.oracle.intear.near";
-const UPDATE_INTERVAL: Duration = Duration::from_secs(10);
+const UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Fee {
@@ -34,6 +36,36 @@ struct Oracle {
     failures: u64,
     fee: Fee,
     example_input: Option<String>,
+}
+
+impl From<Producer> for Oracle {
+    fn from(data: Producer) -> Self {
+        Self {
+            id: data.account_id,
+            name: data.name,
+            description: data.description,
+            successes: data.requests_succeded,
+            failures: data.requests_timed_out,
+            fee: match data.fee {
+                ProducerFee::None => Fee {
+                    amount: 0,
+                    token: "near".parse().unwrap(),
+                },
+                ProducerFee::Near { prepaid_amount } => Fee {
+                    amount: prepaid_amount.as_yoctonear(),
+                    token: "near".parse().unwrap(),
+                },
+                ProducerFee::FungibleToken {
+                    token,
+                    prepaid_amount,
+                } => Fee {
+                    amount: prepaid_amount.0,
+                    token,
+                },
+            },
+            example_input: data.example_input,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -64,31 +96,7 @@ async fn get_oracle_info(oracle_id: &AccountId) -> Oracle {
         .fetch_from_mainnet()
         .await
     {
-        Ok(data) => Oracle {
-            id: oracle_id.clone(),
-            name: data.data.name,
-            description: data.data.description,
-            successes: data.data.requests_succeded,
-            failures: data.data.requests_timed_out,
-            fee: match data.data.fee {
-                ProducerFee::None => Fee {
-                    amount: 0,
-                    token: "near".parse().unwrap(),
-                },
-                ProducerFee::Near { prepaid_amount } => Fee {
-                    amount: prepaid_amount.as_yoctonear(),
-                    token: "near".parse().unwrap(),
-                },
-                ProducerFee::FungibleToken {
-                    token,
-                    prepaid_amount,
-                } => Fee {
-                    amount: prepaid_amount.0,
-                    token,
-                },
-            },
-            example_input: data.data.example_input,
-        },
+        Ok(data) => Oracle::from(data.data),
         Err(err) => {
             error!("{err:?}");
             Oracle {
@@ -126,6 +134,38 @@ async fn update_all_oracles(oracles: Arc<RwLock<Vec<Oracle>>>, oracle_ids: Vec<A
     }
 }
 
+async fn listen_to_oracle_updates(oracles: Arc<RwLock<Vec<Oracle>>>) {
+    let client = EventStreamClient::default();
+    client
+        .stream_events::<LogNep297Event, _, _>("log_nep297", move |event| {
+            let oracles = oracles.clone();
+            async move {
+                if event.account_id == ORACLE_CONTRACT_ID && event.event_standard == "intear-oracle"
+                {
+                    let producer: Producer = match &event.event_event[..] {
+                        "producer_created" => {
+                            serde_json::from_value(event.event_data.unwrap()).unwrap()
+                        }
+                        "producer_updated" => {
+                            serde_json::from_value(event.event_data.unwrap()).unwrap()
+                        }
+                        _ => return,
+                    };
+                    info!("Producer created or updated: {:?}", producer);
+                    let mut oracle_list = oracles.write();
+                    if let Some(oracle) =
+                        oracle_list.iter_mut().find(|o| o.id == producer.account_id)
+                    {
+                        *oracle = producer.into();
+                    } else {
+                        oracle_list.push(producer.into());
+                    }
+                }
+            }
+        })
+        .await;
+}
+
 fn initial_oracle_ids() -> Vec<AccountId> {
     vec!["gpt4o.oracle.intear.near".parse().unwrap()]
 }
@@ -155,10 +195,12 @@ async fn main() -> Result<()> {
     // Initialize with empty vec and update immediately
     let oracles = Arc::new(RwLock::new(Vec::new()));
 
-    // Spawn the background task to update oracle stats
+    // Spawn the background tasks to update oracle stats
     let update_oracles = oracles.clone();
     let update_oracle_ids = oracle_ids.clone();
     tokio::spawn(async move { update_all_oracles(update_oracles, update_oracle_ids).await });
+    let listen_oracles = oracles.clone();
+    tokio::spawn(async move { listen_to_oracle_updates(listen_oracles).await });
 
     let cors = warp::cors()
         .allow_any_origin()
