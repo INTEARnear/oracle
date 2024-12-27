@@ -100,10 +100,14 @@ impl Oracle {
             }
             ProducerFee::Near { prepaid_amount } => {
                 if !env::attached_deposit().is_zero() {
-                    return Some(PrepaidFee::Near {
-                        amount: env::attached_deposit(),
-                        payment_type: NearPaymentType::AttachedToCall,
-                    });
+                    if env::attached_deposit() == *prepaid_amount {
+                        return Some(PrepaidFee::Near {
+                            amount: env::attached_deposit(),
+                            payment_type: NearPaymentType::AttachedToCall,
+                        });
+                    } else {
+                        env::panic_str("Attached NEAR deposit is not equal to the requested amount");
+                    }
                 }
 
                 let consumer = self
