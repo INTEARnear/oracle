@@ -5,9 +5,9 @@ An indexer service that monitors the Bitcoin Oracle contract on NEAR Protocol an
 ## Environment Variables
 
 - `ACCOUNT_ID`: The account ID of the oracle producer
+- `CONTRACT_ID`: The contract ID of the Bitcoin Oracle contract (not to confuse with the Intear Oracle main contract)
 - `PRIVATE_KEY`: The private key for the oracle producer account
 - `BITCOIN_RPC_URL`: URL of the Bitcoin node RPC endpoint
-- `BITCOIN_RPC_AUTH`: Authentication for the Bitcoin RPC (format: username:password)
 
 ## Running
 
