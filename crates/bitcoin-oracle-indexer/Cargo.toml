@@ -1,0 +1,26 @@
+[package]
+name = "bitcoin-oracle-indexer"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+dotenvy = "0.15.7"
+tokio = { version = "1.38.0", features = [ "rt-multi-thread", "macros" ] }
+log = "0.4.21"
+near-api = "0.3.0"
+serde = { version = "1.0.203", features = [ "derive" ] }
+serde_json = "1.0.117"
+anyhow = "1.0.86"
+reqwest = { version = "0.12.4", features = [ "json" ] }
+near-gas = "0.3.0"
+near-token = "0.3.0"
+near-primitives = "0.26.0"
+env_logger = "0.11.1"
+inevents-websocket-client = "1.0.0"
+intear-events = { git = "https://github.com/INTEARnear/inevents" }
+json-filter = "0.1.0"
+futures = "0.3.30"
+bitcoincore-rpc = "0.16.0"
+bitcoin = "0.29.0"
+hex = "0.4.3"
