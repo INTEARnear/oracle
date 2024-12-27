@@ -93,11 +93,16 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                             <Text>Your oracle will appear in the marketplace within 5-10 seconds.</Text>
                             <Text mt={2}>
                                 For more detailed documentation and support, visit{' '}
-                                <Link href="https://docs.intear.tech/oracle" color="purple.500">
+                                <Link href="https://docs.intear.tech/oracle" color="blue.400" isExternal>
                                     our documentation
                                 </Link>
                                 .
                             </Text>
+                        </Box>
+
+                        <Box>
+                            <Heading size="sm" mb={2}>6. Run an indexer</Heading>
+                            <Text>To make your indexer work, you need to run an indexer. You can find an example of an indexer <Link href="https://github.com/INTEARnear/oracle/blob/0fed49b148c62173dc860ab75c398eb88253bdc1/crates/gpt4o-indexer/src/main.rs" color="blue.400" isExternal>here</Link>.</Text>
                         </Box>
                     </VStack>
                 </ModalBody>
