@@ -7,6 +7,8 @@ members = [
     "crates/test-ft-contract",
     "crates/example-consumer",
     "crates/dashboard-backend",
+    "crates/bitcoin-oracle-contract",
+    "crates/bitcoin-oracle-indexer",
 ]
 resolver = "2"
 

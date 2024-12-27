@@ -1,0 +1,24 @@
+[package]
+name = "bitcoin-oracle-contract"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/INTEARnear/oracle"
+
+[package.metadata.near.reproducible_build]
+image = "sourcescan/cargo-near:0.12.2-rust-1.82.0"
+image_digest = "sha256:5013a742e19a95c108bdfce085a57bda2f1047248e5eb9f005a8adc1ec8a1e42"
+container_build_command = ["cargo", "near", "build"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "5.5"
+intear-oracle = { path = "../oracle-contract", default-features = false }
+hex = "0.4"
+
+[dev-dependencies]
+near-sdk = { version = "5.1.0", features = ["unit-testing"] }
+near-workspaces = { version = "0.10.0", features = ["unstable"] }
+tokio = { version = "1.12.0", features = ["full"] }
+serde_json = "1" 
