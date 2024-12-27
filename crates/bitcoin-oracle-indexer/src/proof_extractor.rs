@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use anyhow::Result;
 use bitcoin::{
     hashes::{hex::FromHex, sha256d, Hash},
     Block, Txid,
@@ -40,10 +41,7 @@ struct RpcResponse<T> {
     result: T,
 }
 
-pub async fn get_transaction_proof(
-    tx_id_str: &str,
-    bitcoin_rpc_url: &str,
-) -> Result<TxWithProof, Box<dyn std::error::Error>> {
+pub async fn get_transaction_proof(tx_id_str: &str, bitcoin_rpc_url: &str) -> Result<TxWithProof> {
     // Parse transaction ID
     let tx_id = Txid::from_str(tx_id_str)?;
 
@@ -70,10 +68,12 @@ pub async fn get_transaction_proof(
 
     // Ensure transaction is confirmed
     if tx.confirmations.unwrap_or(0) < 1 {
-        return Err("Transaction not confirmed".into());
+        return Err(anyhow::anyhow!("Transaction not confirmed"));
     }
 
-    let block_hash = tx.blockhash.ok_or("Block hash not found")?;
+    let block_hash = tx
+        .blockhash
+        .ok_or(anyhow::anyhow!("Block hash not found"))?;
 
     // Get block information
     let json_body = serde_json::json!({
@@ -96,7 +96,7 @@ pub async fn get_transaction_proof(
         .txdata
         .iter()
         .position(|tx| tx.txid() == tx_id)
-        .ok_or("Transaction not found in block")?;
+        .ok_or(anyhow::anyhow!("Transaction not found in block"))?;
 
     // Get merkle proof
     let merkle_proof = compute_merkle_proof(
@@ -114,9 +114,19 @@ pub async fn get_transaction_proof(
         .into_iter()
         .map(|vin| {
             Ok(TransactionInput {
-                prev_tx: H256(vin.txid.ok_or("Missing txid")?.to_vec().try_into().unwrap()),
-                prev_index: vin.vout.ok_or("Missing vout")?,
-                script_sig: hex::decode(&vin.script_sig.ok_or("Missing script_sig")?.hex)?,
+                prev_tx: H256(
+                    vin.txid
+                        .ok_or(anyhow::anyhow!("Missing txid"))?
+                        .to_vec()
+                        .try_into()
+                        .unwrap(),
+                ),
+                prev_index: vin.vout.ok_or(anyhow::anyhow!("Missing vout"))?,
+                script_sig: hex::decode(
+                    &vin.script_sig
+                        .ok_or(anyhow::anyhow!("Missing script_sig"))?
+                        .hex,
+                )?,
                 sequence: vin.sequence,
                 witness: vin
                     .txinwitness
@@ -126,7 +136,7 @@ pub async fn get_transaction_proof(
                     .collect(),
             })
         })
-        .collect::<Result<Vec<_>, Box<dyn std::error::Error>>>()?;
+        .collect::<Result<Vec<_>>>()?;
 
     // Convert outputs
     let outputs = tx
@@ -138,7 +148,7 @@ pub async fn get_transaction_proof(
                 script_pubkey: vout.script_pub_key.hex,
             })
         })
-        .collect::<Result<Vec<_>, Box<dyn std::error::Error>>>()?;
+        .collect::<Result<Vec<_>>>()?;
 
     Ok(TxWithProof {
         tx_id: H256(tx_id.to_vec().try_into().unwrap()),
@@ -151,19 +161,17 @@ pub async fn get_transaction_proof(
     })
 }
 
-fn compute_merkle_proof(
-    txs: &[String],
-    tx_index: usize,
-) -> Result<Vec<H256>, Box<dyn std::error::Error>> {
+fn compute_merkle_proof(txs: &[String], tx_index: usize) -> Result<Vec<H256>> {
     let mut proof = Vec::new();
     let mut target_index = tx_index;
 
     // First convert all transaction IDs to sha256d::Hash
     let mut current_level = Vec::with_capacity(txs.len());
     for tx in txs {
-        let txid = Txid::from_str(tx).map_err(|e| format!("Invalid transaction ID: {}", e))?;
-        let hash =
-            sha256d::Hash::from_slice(txid.as_ref()).map_err(|e| format!("Invalid hash: {}", e))?;
+        let txid =
+            Txid::from_str(tx).map_err(|e| anyhow::anyhow!("Invalid transaction ID: {}", e))?;
+        let hash = sha256d::Hash::from_slice(txid.as_ref())
+            .map_err(|e| anyhow::anyhow!("Invalid hash: {}", e))?;
         current_level.push(hash);
     }
 

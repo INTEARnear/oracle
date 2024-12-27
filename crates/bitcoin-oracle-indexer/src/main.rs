@@ -7,7 +7,7 @@ use anyhow::Result;
 use inevents_websocket_client::EventStreamClient;
 use intear_events::events::log::log_nep297::LogNep297Event;
 use json_filter::{Filter, Operator};
-use log::{error, info};
+use log::{error, info, warn};
 use near_api::prelude::{Account, Contract, NetworkConfig};
 use near_api::signer::secret_key::SecretKeySigner;
 use near_api::signer::Signer;
@@ -40,9 +40,23 @@ impl BitcoinOracle {
     async fn handle_request(&self, event: OracleRequestEvent) -> Result<()> {
         let tx_id_str = &event.request_data;
         info!("Processing Bitcoin transaction: {tx_id_str}");
-        let proof = get_transaction_proof(tx_id_str, &self.bitcoin_rpc_url)
-            .await
-            .unwrap();
+
+        let mut attempts = 0;
+        let proof = loop {
+            attempts += 1;
+            match get_transaction_proof(tx_id_str, &self.bitcoin_rpc_url).await {
+                Ok(proof) => break proof,
+                Err(e) => {
+                    if attempts >= 5 {
+                        error!("Failed to get transaction proof after 5 attempts for tx {tx_id_str}: {e:?}");
+                        return Ok(());
+                    }
+                    warn!("Attempt {attempts}/5 failed to get transaction proof for tx {tx_id_str}: {e:?}");
+                    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                }
+            }
+        };
+
         info!("proof: {proof:?}");
         let tx_hash = self
             .contract

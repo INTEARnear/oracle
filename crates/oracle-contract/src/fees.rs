@@ -106,7 +106,9 @@ impl Oracle {
                             payment_type: NearPaymentType::AttachedToCall,
                         });
                     } else {
-                        env::panic_str("Attached NEAR deposit is not equal to the requested amount");
+                        env::panic_str(
+                            "Attached NEAR deposit is not equal to the requested amount",
+                        );
                     }
                 }
 
