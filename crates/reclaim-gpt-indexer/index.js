@@ -50,14 +50,11 @@ await client.streamEvents("log_nep297", {
                 Equals: "request"
             }
         },
-        {
-            path: "event_data.producer_id",
-            operator: {
-                Equals: PRODUCER_CONTRACT_ID
-            }
-        },
     ]
 }, async (event) => {
+    if (event.event_data.producer_id !== PRODUCER_CONTRACT_ID) {
+        return;
+    }
     const data = event.event_data;
     for (let responseAttempt = 0; responseAttempt < 5; responseAttempt++) {
         console.log(`Processing request ${data.request_id}, attempt ${responseAttempt}`);
