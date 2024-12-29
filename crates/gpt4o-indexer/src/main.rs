@@ -19,6 +19,7 @@ const ORACLE_CONTRACT: &str = "dev-unaudited-v1.oracle.intear.near";
 
 #[derive(Debug, Deserialize)]
 struct OracleRequestEvent {
+    #[allow(dead_code)]
     producer_id: AccountId,
     consumer_id: AccountId,
     #[serde(with = "dec_format")]
@@ -159,6 +160,12 @@ async fn main() -> Result<()> {
                     path: "event_event".to_string(),
                     operator: Operator::Equals(serde_json::Value::String("request".to_string())),
                 },
+                Filter {
+                    path: "event_data.producer_id".to_string(),
+                    operator: Operator::Equals(serde_json::Value::String(
+                        oracle.account.0.to_string(),
+                    )),
+                },
             ])),
             move |event| {
                 let oracle = oracle.clone();
@@ -167,10 +174,8 @@ async fn main() -> Result<()> {
                         if let Ok(request) =
                             serde_json::from_value::<OracleRequestEvent>(event_data)
                         {
-                            if request.producer_id == oracle.account.0 {
-                                if let Err(err) = oracle.handle_request(request).await {
-                                    error!("Failed to handle request: {err:?}");
-                                }
+                            if let Err(err) = oracle.handle_request(request).await {
+                                error!("Failed to handle request: {err:?}");
                             }
                         }
                     }

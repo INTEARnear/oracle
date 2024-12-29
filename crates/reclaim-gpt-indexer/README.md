@@ -10,4 +10,3 @@ Environment variables:
 - APP_ID (Reclaim app id)
 - APP_SECRET (Reclaim app secret)
 - OPENAI_API_KEY (sk-your-api-key)
-- MAINNET (true or empty)
