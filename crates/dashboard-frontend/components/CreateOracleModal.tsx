@@ -101,8 +101,8 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                         </Box>
 
                         <Box>
-                            <Heading size="sm" mb={2}>6. Run an indexer</Heading>
-                            <Text>To make your indexer work, you need to run an indexer. You can find an example of an indexer <Link href="https://github.com/INTEARnear/oracle/blob/0fed49b148c62173dc860ab75c398eb88253bdc1/crates/gpt4o-indexer/src/main.rs" color="blue.400" isExternal>here</Link>.</Text>
+                            <Heading size="sm" mb={2}>6. Run a node</Heading>
+                            <Text>To make your node work, you need to run a node service. You can find an example of a node <Link href="https://github.com/INTEARnear/oracle/blob/0fed49b148c62173dc860ab75c398eb88253bdc1/crates/gpt4o-node/src/main.rs" color="blue.400" isExternal>here</Link>.</Text>
                         </Box>
                     </VStack>
                 </ModalBody>

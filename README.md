@@ -26,10 +26,10 @@ There are just 2 interesting methods: `request` and `respond`, which are meant f
 2. If the consumer has enough deposit for fees, they get frozen in the contract for this specific request, and a log is fired:
    `EVENT_JSON:{"standard":"intear-oracle","version":"1.0.0","event":"request","data":{"consumer_id":"{consumer}","request_id":"0","request_data":"Hello World!"}}`.
    The contract stores a **resumption token**, the producer can choose to subsidize the storage deposit, it gets deleted soon anyway. 
-3. The indexer in [crates/indexer](crates/indexer) catches all events with `standard: "intear-oracle"` and `event: "request"`, gets the data,
+3. The node in [crates/node](crates/node) catches all events with `standard: "intear-oracle"` and `event: "request"`, gets the data,
    and sends it using `respond(request_id: StringifiedNumber, response: Response)` where Response is defined in [crates/oracle-contract/src/producer.rs](crates/oracle-contract/src/producer.rs).
 4. The contract removes the pending request freeing up the storage, and resumes the yielded execution with Some(response).
-5. If the indexer fails to respond in 200 blocks (`yield_timeout_length_in_blocks` NEAR parameter config), the yielded execution resumes with None response.
+5. If the node fails to respond in 200 blocks (`yield_timeout_length_in_blocks` NEAR parameter config), the yielded execution resumes with None response.
 
 ### Paying for usage
 
@@ -93,3 +93,11 @@ This contract is designed to simplify the delivery of off-chain data and create 
 - Data from other blockchains (can be used in chain abstracted dapps to verify that transaction was sent and / or get tx result)
 - Anything else, it's basically a set of building blocks that give you an ability to charge a fee for a request. All you need to do is set up the producer
   account and send these `respond` transactions.
+
+## How it works
+
+1. A consumer contract calls `request` method on the oracle contract with a request data and a fee.
+2. The oracle contract stores the request and yields execution.
+3. The node catches all events with `standard: "intear-oracle"` and `event: "request"`, gets the data,
+4. The node calls `respond` method on the oracle contract with the response data.
+5. If the node fails to respond in 200 blocks (`yield_timeout_length_in_blocks` NEAR parameter config), the yielded execution resumes with None response.

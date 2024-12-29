@@ -29,14 +29,14 @@ struct OracleRequestEvent {
 }
 
 #[derive(Clone)]
-struct BitcoinOracle {
+struct BitcoinNode {
     account: Account,
     contract: Contract,
     signer: Arc<Signer>,
     bitcoin_rpc_url: String,
 }
 
-impl BitcoinOracle {
+impl BitcoinNode {
     async fn handle_request(&self, event: OracleRequestEvent) -> Result<()> {
         let tx_id_str = &event.request_data;
         info!("Processing Bitcoin transaction: {tx_id_str}");
@@ -93,7 +93,7 @@ async fn main() -> Result<()> {
 
     env_logger::init();
 
-    let oracle = BitcoinOracle {
+    let oracle = Arc::new(BitcoinNode {
         account: Account(
             std::env::var("ACCOUNT_ID")
                 .expect("No ACCOUNT_ID environment variable")
@@ -115,7 +115,7 @@ async fn main() -> Result<()> {
         .expect("Failed to create a signer"),
         bitcoin_rpc_url: std::env::var("BITCOIN_RPC_URL")
             .expect("No BITCOIN_RPC_URL environment variable"),
-    };
+    });
 
     let client = EventStreamClient::default();
     client

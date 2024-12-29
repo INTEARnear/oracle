@@ -1,6 +1,6 @@
-# Bitcoin Oracle Indexer
+# Bitcoin Oracle Node
 
-An indexer service that monitors the Bitcoin Oracle contract on NEAR Protocol and processes relevant events.
+A node service that monitors the Bitcoin Oracle contract on NEAR Protocol and processes relevant events.
 
 ## Environment Variables
 

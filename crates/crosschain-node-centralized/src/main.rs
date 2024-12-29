@@ -44,14 +44,14 @@ struct Response {
     refund_amount: Option<Balance>,
 }
 
-struct CrosschainIndexer {
+struct CrosschainNode {
     account: Account,
     signer: Arc<Signer>,
     ethereum_rpc_url: Url,
 }
 
 #[async_trait]
-impl Indexer for CrosschainIndexer {
+impl Indexer for CrosschainNode {
     type Error = String;
 
     async fn on_receipt(
@@ -160,7 +160,7 @@ async fn main() {
         .env()
         .init()
         .unwrap();
-    let mut indexer = CrosschainIndexer {
+    let mut node = CrosschainNode {
         account: Account(
             std::env::var("ACCOUNT_ID")
                 .expect("No ACCOUNT_ID environment variable")
@@ -180,7 +180,7 @@ async fn main() {
             .expect("ETHEREUM_RPC_URL environment variable is invalid"),
     };
     run_indexer(
-        &mut indexer,
+        &mut node,
         FastNearDataServerProvider::mainnet(),
         IndexerOptions {
             range: BlockIterator::AutoContinue(AutoContinue::default()),
