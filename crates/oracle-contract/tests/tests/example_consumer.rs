@@ -52,7 +52,7 @@ async fn example_consumer_is_operational() -> Result<(), Box<dyn std::error::Err
         .transact_async()
         .await?;
 
-    sandbox.fast_forward(49).await?; // no idea why that many blocks are needed, 49 works but 48 doesn't
+    sandbox.fast_forward(50).await?; // no idea why that many blocks are needed, 49 works most of the time but 48 doesn't
 
     let outcome = producer_account
         .call(contract.id(), "respond")
