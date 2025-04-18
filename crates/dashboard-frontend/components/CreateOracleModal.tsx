@@ -93,7 +93,7 @@ export const CreateOracleModal = ({ isOpen, onClose }: CreateOracleModalProps) =
                             <Text>Your oracle will appear in the marketplace within 5-10 seconds.</Text>
                             <Text mt={2}>
                                 For more detailed documentation and support, visit{' '}
-                                <Link href="https://docs.intear.tech/oracle" color="blue.400" isExternal>
+                                <Link href="https://docs.intear.tech/docs/oracle" color="blue.400" isExternal>
                                     our documentation
                                 </Link>
                                 .

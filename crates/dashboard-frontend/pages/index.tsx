@@ -185,7 +185,7 @@ export default function Home() {
       <Box as="footer" py={8} borderTop="1px solid" borderColor="gray.800" mt="auto">
         <Container maxW="container.xl">
           <Stack direction="row" spacing={6} justify="center">
-            <Button variant="link" as="a" href="https://docs.intear.tech/oracle">
+            <Button variant="link" as="a" href="https://docs.intear.tech/docs/oracle">
               Documentation
             </Button>
             <Button variant="link" as="a" href="https://intear.tech">
