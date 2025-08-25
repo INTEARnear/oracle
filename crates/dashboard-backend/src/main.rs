@@ -5,7 +5,7 @@ use intear_events::events::log::log_nep297::LogNep297Event;
 use intear_oracle::fees::ProducerFee;
 use json_filter::{Filter, Operator};
 use log::{error, info, warn};
-use near_api::prelude::{AccountId, Contract, Reference};
+use near_api::prelude::{AccountId, Contract, NetworkConfig, Reference};
 use near_primitives::serialize::dec_format;
 use near_primitives::types::Balance;
 use parking_lot::RwLock;
@@ -97,7 +97,10 @@ async fn get_oracle_info(oracle_id: &AccountId) -> Oracle {
         .unwrap()
         .read_only::<Producer>()
         .at(Reference::Final)
-        .fetch_from_mainnet()
+        .fetch_from(&NetworkConfig {
+            rpc_url: "https://rpc.intea.rs".parse().unwrap(),
+            ..NetworkConfig::mainnet()
+        })
         .await
     {
         Ok(data) => Oracle::from(data.data),
