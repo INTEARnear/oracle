@@ -27,7 +27,7 @@ jobs:
           components: rustfmt, clippy
           
       - name: Install cargo-near
-        run: cargo install cargo-near@0.13.2
+        run: cargo install cargo-near --locked
           
       - name: Check formatting
         run: cargo fmt --all -- --check
