@@ -70,3 +70,62 @@ async fn contract_is_operational() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn request_timeout() -> Result<(), Box<dyn std::error::Error>> {
+    let sandbox = near_workspaces::sandbox().await?;
+    let contract_wasm = crate::get_contract_wasm().await;
+
+    let contract = sandbox.dev_deploy(contract_wasm).await?;
+
+    let producer_account = sandbox.dev_create_account().await?;
+    let consumer_account = sandbox.dev_create_account().await?;
+
+    let outcome = producer_account
+        .call(contract.id(), "add_producer")
+        .args_json(json!({}))
+        .transact()
+        .await?;
+    assert!(outcome.is_success());
+
+    let outcome = consumer_account
+        .call(contract.id(), "register_consumer")
+        .args_json(json!({
+            "account_id": consumer_account.id(),
+        }))
+        .transact()
+        .await?;
+    assert!(outcome.is_success());
+
+    // Make a request but don't respond to it
+    let request = consumer_account
+        .call(contract.id(), "request")
+        .args_json(json!({
+            "producer_id": producer_account.id(),
+            "request_data": "This will timeout",
+        }))
+        .transact_async()
+        .await?;
+
+    sandbox.fast_forward(250).await?;
+
+    let request_result = request.await?;
+    assert!(request_result.is_success());
+
+    let logs = request_result.logs();
+    assert_eq!(logs, vec![
+        format!("EVENT_JSON:{{\"standard\":\"intear-oracle\",\"version\":\"1.0.0\",\"event\":\"request\",\"data\":{{\"producer_id\":\"{producer}\",\"consumer_id\":\"{consumer}\",\"request_id\":\"0\",\"request_data\":\"This will timeout\"}}}}", 
+            producer = producer_account.id(),
+            consumer = consumer_account.id()
+        ),
+        format!("Response from {producer} for 0: Err(Failed), refund Err(Failed)", 
+            producer = producer_account.id()
+        ),
+        format!(
+            "EVENT_JSON:{{\"standard\":\"intear-oracle\",\"version\":\"1.0.0\",\"event\":\"producer_updated\",\"data\":{{\"account_id\":\"{producer}\",\"requests_succeded\":0,\"requests_timed_out\":1,\"fee\":\"None\",\"send_callback\":false,\"name\":\"Unnamed\",\"description\":\"No description\",\"example_input\":null}}}}",
+            producer = producer_account.id()
+        ),
+    ]);
+
+    Ok(())
+}
