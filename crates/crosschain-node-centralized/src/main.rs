@@ -65,7 +65,7 @@ impl Indexer for CrosschainNode {
                 if let Ok(event) = EventLogData::<OracleRequestEvent>::deserialize(log) {
                     if event.standard == "intear-oracle"
                         && event.event == "request"
-                        && event.parse_semver().map_or(false, |v| v.major == 1)
+                        && event.parse_semver().is_ok_and(|v| v.major == 1)
                         && event.data.producer_id == self.account.0
                     {
                         let msg = event.data.request_data;
